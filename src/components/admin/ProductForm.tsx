@@ -17,6 +17,7 @@ const schema = z.object({
     brand_id: z.string().optional(),
     category_id: z.string().min(1, 'Category is required'),
     show_price: z.boolean().default(true),
+    image_url: z.string().optional().nullable(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -32,7 +33,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
     const [loading, setLoading] = useState(false);
     const [showPreview, setShowPreview] = useState(false);
     const [imageFile, setImageFile] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(initialData?.image_url || null);
     const [showCategoryModal, setShowCategoryModal] = useState(false);
     const [showBrandModal, setShowBrandModal] = useState(false);
     const { createProduct, categories, brands, fetchCategories, fetchBrands, updateProduct } = useStore();
@@ -79,8 +80,9 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                 throw new Error('Please select a category');
             }
 
-            let imageUrl = '';
-            if (imageFile) {
+            let imageUrl = imagePreview || '';
+            
+            if (imageUrl === '' && imageFile) {
                 imageUrl = await uploadProductImage(imageFile);
             }
 

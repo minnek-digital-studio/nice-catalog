@@ -10,6 +10,7 @@ import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { Database } from '../../types/supabase';
+import { Eye, EyeOff } from 'lucide-react';
 
 type Product = Database['public']['Tables']['products']['Row'] & {
     category?: Database['public']['Tables']['categories']['Row'] | null;
@@ -20,9 +21,10 @@ interface SortableRowProps {
     product: Product;
     onEdit: (product: Product) => void;
     onDelete: (product: Product) => void;
+    onToggleVisibility: (product: Product) => void;
 }
 
-function SortableRow({ id, product, onEdit, onDelete }: SortableRowProps) {
+function SortableRow({ id, product, onToggleVisibility, onEdit, onDelete }: SortableRowProps) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
     const style = {
@@ -72,6 +74,19 @@ function SortableRow({ id, product, onEdit, onDelete }: SortableRowProps) {
                     >
                         <Menu.Items className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
                             <div className="py-1">
+                                <Menu.Item>
+                                    {({ active }) => (
+                                        <button
+                                        onClick={() => onToggleVisibility(product)}
+                                        className={`${
+                                            active ? 'bg-gray-100' : ''
+                                        } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
+                                        >
+                                        {product.visible ? (<EyeOff className="size-4 mr-2" /> ) : (<Eye className="size-4 mr-2" />)}
+                                        {product.visible ? 'Hide' : 'Show'}
+                                        </button>
+                                    )}
+                                </Menu.Item>
                                 <Menu.Item>
                                     {({ active }) => (
                                         <button
@@ -133,6 +148,15 @@ export default function ProductList() {
         setShowModal(false);
         setSelectedProduct(null);
     };
+    
+    const handleToggleVisibility = async (product: Product) => {
+        try {
+          await updateProduct(product.id, { visible: !product.visible });
+          toast.success(product.visible ? 'Product hidden' : 'Product shown');
+        } catch (error) {
+          toast.error('Failed to update product visibility');
+        }
+      };
 
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
@@ -230,6 +254,7 @@ export default function ProductList() {
                                                 product={product}
                                                 onEdit={handleEdit}
                                                 onDelete={handleDelete}
+                                                onToggleVisibility={handleToggleVisibility}
                                             />
                                         ))}
                                     </SortableContext>

@@ -83,6 +83,7 @@ export interface Database {
                     created_at: string
                     updated_at: string
                     show_price: boolean
+                    visible: boolean
                 }
                 Insert: {
                     id?: string
@@ -99,6 +100,7 @@ export interface Database {
                     created_at?: string
                     updated_at?: string
                     show_price?: boolean
+                    visible: boolean
                 }
                 Update: {
                     id?: string
@@ -115,6 +117,7 @@ export interface Database {
                     created_at?: string
                     updated_at?: string
                     show_price?: boolean
+                    visible: boolean
                 }
             }
             profiles: {
