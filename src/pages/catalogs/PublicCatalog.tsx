@@ -62,6 +62,7 @@ export default function PublicCatalog() {
           .from('products')
           .select('*, category:categories(*)')
           .eq('catalog_id', catalogData.id)
+          .eq('visible', true)
           .order('position', { ascending: true });
 
         if (productsError) {
