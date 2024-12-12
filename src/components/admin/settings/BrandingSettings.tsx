@@ -43,7 +43,18 @@ export default function BrandingSettings() {
     }
   };
 
-  const onSubmit = async (data: FormData) => {
+  const handleLogoRemove = async () => {
+    try {
+      await updateProfile({ logo_url: null });
+      setLogoFile(null);
+      setLogoPreview(null);
+      toast.success('Logo removed successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to remove the logo');
+    }
+  };
+
+  const onSubmit = async () => {
     try {
       let logoUrl = user?.logo_url;
 
@@ -52,6 +63,7 @@ export default function BrandingSettings() {
       }
 
       await updateProfile({ logo_url: logoUrl });
+      setLogoPreview(logoUrl);
       toast.success('Branding updated successfully');
     } catch (error: any) {
       toast.error(error.message || 'Failed to update branding');
@@ -79,10 +91,7 @@ export default function BrandingSettings() {
                 />
                 <button
                   type="button"
-                  onClick={() => {
-                    setLogoFile(null);
-                    setLogoPreview(user?.logo_url || null);
-                  }}
+                  onClick={handleLogoRemove}
                   className="absolute -top-2 -right-2 p-1 bg-red-100 rounded-full text-red-600 hover:bg-red-200 transition-colors duration-200"
                 >
                   <X className="w-4 h-4" />
