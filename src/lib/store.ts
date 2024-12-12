@@ -31,8 +31,10 @@ interface StoreState {
   updateProduct: (id: string, updates: Partial<Database['public']['Tables']['products']['Update']>) => Promise<Product | null>;
   deleteProduct: (id: string) => Promise<boolean>;
   createCategory: (category: Omit<Database['public']['Tables']['categories']['Insert'], 'catalog_id'>) => Promise<Category | null>;
+  updateCategory: (id: string, updates: Partial<Database['public']['Tables']['categories']['Update']>) => Promise<Category | null>;
   deleteCategory: (id: string) => Promise<boolean>;
   createBrand: (brand: Omit<Database['public']['Tables']['brands']['Insert'], 'catalog_id'>) => Promise<Brand | null>;
+  updateBrand: (id: string, updates: Partial<Database['public']['Tables']['brands']['Update']>) => Promise<Brand | null>;
   deleteBrand: (id: string) => Promise<boolean>;
   reorderProducts: (productId: string, newPosition: number) => Promise<void>;
 }
@@ -328,7 +330,26 @@ export const useStore = create<StoreState>((set, get) => ({
       throw error;
     }
   },
+  
+  updateCategory: async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
 
+      if (error) throw error;
+
+      const categories = get().categories.map((c) => (c.id === id ? data : c));
+      set({ categories });
+      return data;
+    } catch (error) {
+      console.error('Error updating category:', error);
+      return null;
+    }
+  },
   deleteCategory: async (id) => {
     try {
       const { error } = await supabase
@@ -371,6 +392,26 @@ export const useStore = create<StoreState>((set, get) => ({
     } catch (error) {
       console.error('Error creating brand:', error);
       throw error;
+    }
+  },
+  
+  updateBrand: async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('brands')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const brands = get().brands.map((b) => (b.id === id ? data : b));
+      set({ brands });
+      return data;
+    } catch (error) {
+      console.error('Error updating brand:', error);
+      return null;
     }
   },
 
