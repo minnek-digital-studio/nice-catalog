@@ -1,12 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '../../lib/store';
-import { Plus, Pencil, Trash2, Building2 } from 'lucide-react';
+import { Plus, Trash2, Building2, Pencil } from 'lucide-react';
 import BrandModal from './BrandModal';
 import { toast } from 'react-hot-toast';
+import type { Database } from '../../types/supabase';
+
+type Brand = Database['public']['Tables']['brands']['Row'];
 
 export default function BrandList() {
   const [showModal, setShowModal] = useState(false);
   const { brands, fetchBrands, deleteBrand } = useStore();
+  const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
 
   useEffect(() => {
     fetchBrands();
@@ -17,11 +21,20 @@ export default function BrandList() {
       try {
         await deleteBrand(id);
         toast.success('Brand deleted successfully');
-      } catch (error: any) {
-        toast.error(error.message || 'Failed to delete brand');
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          toast.error(error.message || 'Failed to delete brand');
+        } else {
+          toast.error('Failed to delete brand');
+        }
       }
     }
   };
+  
+  const onEdit = (brand: Brand) => {
+    setSelectedBrand(brand);
+    setShowModal(true);
+  }
 
   return (
     <div>
@@ -57,6 +70,13 @@ export default function BrandList() {
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
+                    onClick={() => onEdit(brand)}
+                    className="p-1 text-gray-400 hover:text-yellow-500"
+                  >
+                    <Pencil className="w-5 h-5" />
+                  </button>
+                  
+                  <button
                     onClick={() => handleDelete(brand.id)}
                     className="p-1 text-gray-400 hover:text-red-500"
                   >
@@ -74,7 +94,10 @@ export default function BrandList() {
         </ul>
       </div>
 
-      {showModal && <BrandModal onClose={() => setShowModal(false)} />}
+      {showModal && <BrandModal onClose={() => {
+        setShowModal(false);
+        setSelectedBrand(null);
+      }} brand={selectedBrand} />}
     </div>
   );
 }

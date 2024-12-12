@@ -34,6 +34,7 @@ interface StoreState {
   updateCategory: (id: string, updates: Partial<Database['public']['Tables']['categories']['Update']>) => Promise<Category | null>;
   deleteCategory: (id: string) => Promise<boolean>;
   createBrand: (brand: Omit<Database['public']['Tables']['brands']['Insert'], 'catalog_id'>) => Promise<Brand | null>;
+  updateBrand: (id: string, updates: Partial<Database['public']['Tables']['brands']['Update']>) => Promise<Brand | null>;
   deleteBrand: (id: string) => Promise<boolean>;
   reorderProducts: (productId: string, newPosition: number) => Promise<void>;
 }
@@ -391,6 +392,26 @@ export const useStore = create<StoreState>((set, get) => ({
     } catch (error) {
       console.error('Error creating brand:', error);
       throw error;
+    }
+  },
+  
+  updateBrand: async (id, updates) => {
+    try {
+      const { data, error } = await supabase
+        .from('brands')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const brands = get().brands.map((b) => (b.id === id ? data : b));
+      set({ brands });
+      return data;
+    } catch (error) {
+      console.error('Error updating brand:', error);
+      return null;
     }
   },
 
