@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../../lib/store';
 import AdminLayout from '../../components/admin/AdminLayout';
@@ -10,7 +10,8 @@ import { signOut } from '../../lib/auth';
 export default function ProductsPage() {
   const { catalogId } = useParams<{ catalogId: string }>();
   const navigate = useNavigate();
-  const { catalogs, setCurrentCatalog } = useStore();
+  const { catalogs ,setCurrentCatalog, fetchCatalogs } = useStore();
+  const [ loading, setLoading ] = useState(true);
 
   useEffect(() => {
     const loadCatalog = async () => {
@@ -19,23 +20,34 @@ export default function ProductsPage() {
         return;
       }
 
+      if (!catalogs.length && loading) {
+        await fetchCatalogs();
+        setLoading(false);
+        return;
+      } else {
+        setLoading(false);
+      }
+
       const catalog = catalogs.find(c => c.id === catalogId);
       if (catalog) {
         setCurrentCatalog(catalog);
       } else {
-        toast.error('Catalog not found');
+        toast.error('Catalog not found, admin/Products.tsx');
         navigate('/admin/catalogs');
       }
     };
 
     loadCatalog();
-  }, [catalogId, catalogs, navigate, setCurrentCatalog]);
+  }, [catalogs]);
 
   const handleSignOut = async () => {
     try {
       await signOut();
       toast.success('Signed out successfully');
-    } catch (error) {
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+      }
       toast.error('Failed to sign out');
     }
   };

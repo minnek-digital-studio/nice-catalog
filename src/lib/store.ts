@@ -312,32 +312,43 @@ export const useStore = create<StoreState>((set, get) => ({
 
             if (oldIndex === -1) return;
 
-            // Optimistically update the UI
             const newProducts = [...products];
             const [movedProduct] = newProducts.splice(oldIndex, 1);
             newProducts.splice(newIndex, 0, movedProduct);
 
-            // Update positions in the array
-            const updatedProducts = newProducts.map((product, index) => ({
-                ...product,
-                position: index + 1,
+            const affectedProducts = newProducts.slice(
+                Math.min(oldIndex, newIndex),
+                Math.max(oldIndex, newIndex) + 1
+            );
+
+            const newProductList = newProducts.map((p, i) => {
+                if (affectedProducts.includes(p)) {
+                    return { ...p, position: i + Math.min(oldIndex, newIndex) };
+                } 
+                return p;
+            });
+
+            const updateAffectedProducts = affectedProducts.map((p, i) => ({
+                id: p.id,
+                position: i + Math.min(oldIndex, newIndex),
             }));
+            
+            updateAffectedProducts.forEach(async (product) => {
+                const { error } = await supabase
+                    .from("products")
+                    .update({
+                        position: product.position,
+                    })
+                    .eq("id", product.id);
+                if (error) throw error
+            });
 
-            // Update the database
-            const { error } = await supabase
-                .from("products")
-                .update({
-                    position: newPosition,
-                })
-                .eq("id", productId);
-
-            set({ products: updatedProducts });
-
-            if (error) throw error;
+            set({ products: newProductList });
         } catch (error) {
-            console.error("Error reordering products:", error);
             // Revert to original order on error
             get().fetchProducts();
+            console.error("Error reordering products:", error);
+            throw error;
         }
     },
 
