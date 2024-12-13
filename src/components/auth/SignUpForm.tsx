@@ -89,7 +89,7 @@ export default function SignUpForm() {
             await signUp(formData);
             toast.success("Account created successfully!");
             toast.success("Please check your email to verify your account", {
-                duration: 3000,
+                duration: 8000,
             });
             navigate("/admin");
         } catch (error: unknown) {
