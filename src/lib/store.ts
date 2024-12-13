@@ -29,6 +29,7 @@ interface StoreState {
   fetchBrands: () => Promise<void>;
   createProduct: (product: Omit<Database['public']['Tables']['products']['Insert'], 'catalog_id'>) => Promise<Product | null>;
   updateProduct: (id: string, updates: Partial<Database['public']['Tables']['products']['Update']>) => Promise<Product | null>;
+  reorderProducts: (productId: string, newPosition: number) => Promise<void>;
   deleteProduct: (id: string) => Promise<boolean>;
   createCategory: (category: Omit<Database['public']['Tables']['categories']['Insert'], 'catalog_id'>) => Promise<Category | null>;
   updateCategory: (id: string, updates: Partial<Database['public']['Tables']['categories']['Update']>) => Promise<Category | null>;
@@ -36,7 +37,6 @@ interface StoreState {
   createBrand: (brand: Omit<Database['public']['Tables']['brands']['Insert'], 'catalog_id'>) => Promise<Brand | null>;
   updateBrand: (id: string, updates: Partial<Database['public']['Tables']['brands']['Update']>) => Promise<Brand | null>;
   deleteBrand: (id: string) => Promise<boolean>;
-  reorderProducts: (productId: string, newPosition: number) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -279,10 +279,52 @@ export const useStore = create<StoreState>((set, get) => ({
 
       const products = get().products.map((p) => (p.id === id ? data : p));
       set({ products });
+      console.log('Updated product:', products);
       return data;
     } catch (error) {
       console.error('Error updating product:', error);
       throw error;
+    }
+  },
+
+  reorderProducts: async (productId: string, newPosition: number) => {
+    const products = get().products;
+    const catalogId = get().currentCatalog?.id;
+    
+    if (!catalogId) return;
+
+    try {
+      const oldIndex = products.findIndex(p => p.id === productId);
+      const newIndex = newPosition;
+
+      if (oldIndex === -1) return;
+
+      // Optimistically update the UI
+      const newProducts = [...products];
+      const [movedProduct] = newProducts.splice(oldIndex, 1);
+      newProducts.splice(newIndex, 0, movedProduct);
+
+      // Update positions in the array
+      const updatedProducts = newProducts.map((product, index) => ({
+        ...product,
+        position: index + 1
+      }));
+
+      // Update the database
+      const { error } = await supabase
+        .from('products')
+        .update( {
+          position: newPosition
+        })
+        .eq('id', productId);
+        
+      set({ products: updatedProducts });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error reordering products:', error);
+      // Revert to original order on error
+      get().fetchProducts();
     }
   },
 
@@ -430,46 +472,6 @@ export const useStore = create<StoreState>((set, get) => ({
     } catch (error) {
       console.error('Error deleting brand:', error);
       return false;
-    }
-  },
-
-  reorderProducts: async (productId: string, newPosition: number) => {
-    const products = get().products;
-    const catalogId = get().currentCatalog?.id;
-    
-    if (!catalogId) return;
-
-    try {
-      const oldIndex = products.findIndex(p => p.id === productId);
-      const newIndex = newPosition;
-
-      if (oldIndex === -1) return;
-
-      // Optimistically update the UI
-      const newProducts = [...products];
-      const [movedProduct] = newProducts.splice(oldIndex, 1);
-      newProducts.splice(newIndex, 0, movedProduct);
-
-      // Update positions in the array
-      const updatedProducts = newProducts.map((product, index) => ({
-        ...product,
-        position: index + 1
-      }));
-
-      set({ products: updatedProducts });
-
-      // Update the database
-      const { error } = await supabase.rpc('reorder_products', {
-        p_catalog_id: catalogId,
-        p_product_id: productId,
-        p_new_position: newPosition + 1
-      });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error reordering products:', error);
-      // Revert to original order on error
-      get().fetchProducts();
     }
   },
 }));

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useStore } from '../../lib/store';
 import { Plus, Search, Filter, MoreVertical, Edit2, Trash2, GripVertical } from 'lucide-react';
 import ProductModal from './ProductModal';
@@ -11,6 +11,7 @@ import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import type { Database } from '../../types/supabase';
 import { Eye, EyeOff } from 'lucide-react';
+import { set } from 'zod';
 
 type Product = Database['public']['Tables']['products']['Row'] & {
     category?: Database['public']['Tables']['categories']['Row'] | null;
@@ -126,13 +127,20 @@ export default function ProductList() {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('');
-    const { products, categories, updateProduct } = useStore();
-
-    const filteredProducts = products.filter(product => {
-        const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = !selectedCategory || product.category_id === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
+    const { products, categories, updateProduct, reorderProducts } = useStore();
+    
+    const filterProducts = useCallback(() => {
+        return products.filter((product) => {
+            const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesCategory = selectedCategory ? product.category?.id === selectedCategory : true;
+            return matchesSearch && matchesCategory;
+        })
+    }, [products, searchQuery, selectedCategory]);
+    const [filteredProducts, setfilteredProducts] = useState<Product[]>(filterProducts());
+    
+    useEffect(() => {
+        setfilteredProducts(filterProducts());
+    }, [filterProducts]);
 
     const handleEdit = (product: Product) => {
         setSelectedProduct(product);
@@ -153,8 +161,12 @@ export default function ProductList() {
         try {
           await updateProduct(product.id, { visible: !product.visible });
           toast.success(product.visible ? 'Product hidden' : 'Product shown');
-        } catch (error) {
-          toast.error('Failed to update product visibility');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(error.message || 'Failed to update product visibility');
+            } else {
+                toast.error('Failed to update product visibility');
+            }
         }
       };
 
@@ -164,12 +176,20 @@ export default function ProductList() {
         if (over && active.id !== over.id) {
             const oldIndex = products.findIndex(p => p.id === active.id);
             const newIndex = products.findIndex(p => p.id === over.id);
-
+            const updatedProducts = [...products];
+            const [movedProduct] = updatedProducts.splice(oldIndex, 1);
+            updatedProducts.splice(newIndex, 0, movedProduct);
+            setfilteredProducts(updatedProducts);
+            
             try {
-                await updateProduct(active.id as string, { position: newIndex });
+                await reorderProducts((active.id as string), newIndex);
                 toast.success('Product order updated');
             } catch (error) {
-                toast.error('Failed to update product order');
+                if (error instanceof Error) {
+                    toast.error(error.message || 'Failed to update product order');
+                } else {
+                    toast.error('Failed to update product order');
+                }
             }
         }
     };
