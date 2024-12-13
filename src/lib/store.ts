@@ -293,7 +293,6 @@ export const useStore = create<StoreState>((set, get) => ({
                 p.id === id ? data : p
             ) as Product[];
             set({ products });
-            console.log("Updated product:", products);
             return data as Product;
         } catch (error) {
             console.error("Error updating product:", error);
