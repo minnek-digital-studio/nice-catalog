@@ -38,10 +38,11 @@ export default function SignUpForm() {
 
   const validateField = (field: keyof SignUpData, value: string) => {
     try {
-      const fieldSchema = signUpSchema.pick({ [field]: true });
+      const fieldSchema = signUpSchema.pick({ [field]: true } as Record<keyof SignUpData, true>);
       fieldSchema.parse({ [field]: value });
       setErrors(prev => ({ ...prev, [field]: '' }));
       return true;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       const message = error.errors[0]?.message || `Invalid ${field}`;
       setErrors(prev => ({ ...prev, [field]: message }));
@@ -76,9 +77,16 @@ export default function SignUpForm() {
     try {
       await signUp(formData);
       toast.success('Account created successfully!');
-      navigate('/admin/catalogs');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to create account');
+      toast.success('Please check your email to verify your account', {
+        duration: 3000,
+      });
+      navigate('/admin');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || 'Failed to create account');
+      } else {
+        toast.error('Failed to create account');
+      }
       console.error('Signup error:', error);
     } finally {
       setLoading(false);
