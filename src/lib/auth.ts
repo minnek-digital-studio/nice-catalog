@@ -24,17 +24,7 @@ export async function signUp({ email, password, fullName, username }: SignUpData
     });
 
     if (profileError) throw profileError;
-    
-    useStore.getState().setUser({
-      id: auth.user.id,
-      email,
-      full_name: fullName,
-      username: username.toLowerCase(),
-      avatar_url: null,
-      created_at: new Date().toISOString(),
-    });
   }
-
   return auth;
 }
 
