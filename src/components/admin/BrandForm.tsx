@@ -56,6 +56,13 @@ const BrandForm = ({ onClose, initialData }: Props) => {
     };
 
     const handleImageChange = (file: File | null) => {
+        const maxSize = 2 * 1024 * 1024; // 2MB
+
+        if (file && file.size > maxSize) {
+            toast.error("Image size must be less than 2MB");
+            return;
+        }
+
         setLogoFile(file);
 
         if (file) {

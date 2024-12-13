@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useStore } from '../../lib/store';
 import { toast } from 'react-hot-toast';
 import { Plus, Upload, Loader2 } from 'lucide-react';
@@ -9,6 +9,10 @@ import { uploadProductImage } from '../../lib/storage';
 import ProductPreview from './ProductPreview';
 import CategoryModal from './CategoryModal';
 import BrandModal from './BrandModal';
+import type { Database } from '../../types/supabase';
+
+
+type Product = Partial<Database["public"]["Tables"]["products"]["Update"]>;
 
 const schema = z.object({
     title: z.string().min(1, 'Product name is required'),
@@ -57,6 +61,13 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
     }, [fetchCategories, fetchBrands]);
 
     const handleImageChange = (file: File | null) => {
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        
+        if (file && file.size > maxSize) {
+            toast.error('Image size must be less than 2MB');
+            return;
+        }
+        
         setImageFile(file);
         if (file) {
             const reader = new FileReader();
@@ -97,7 +108,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                 category_id: data.category_id,
                 image_url: imageUrl,
                 slug,
-            };
+            } as Product;
 
             if (productId) {
                 await updateProduct(productId, productData);
@@ -105,11 +116,15 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                 onSuccess?.();
                 return;
             }
-            await createProduct(productData);
+            await createProduct(productData as Omit<Database["public"]["Tables"]["products"]["Insert"], "catalog_id">);
             toast.success('Product created successfully');
             onSuccess?.();
-        } catch (error: any) {
-            toast.error(error.message || 'Failed to create product');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(error.message || 'Failed to create product');
+            } else {
+                toast.error('Failed to create product');
+            }
             console.error('Error creating product:', error);
         } finally {
             setLoading(false);
