@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 
-const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 interface ImageProcessingOptions {
@@ -15,7 +15,7 @@ async function validateImage(file: File) {
   }
 
   if (file.size > MAX_IMAGE_SIZE) {
-    throw new Error('File size must be less than 10MB');
+    throw new Error('File size must be less than 2MB');
   }
 
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {

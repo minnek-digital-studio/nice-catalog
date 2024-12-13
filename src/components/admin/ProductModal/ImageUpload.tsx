@@ -13,7 +13,7 @@ export default function ImageUpload({ initialImage, onImageSelected }: Props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const validateFile = (file: File): boolean => {
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 2 * 1024 * 1024; // 2MB
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
     if (!allowedTypes.includes(file.type)) {
@@ -22,7 +22,7 @@ export default function ImageUpload({ initialImage, onImageSelected }: Props) {
     }
 
     if (file.size > maxSize) {
-      toast.error('File is too large. Maximum size is 10MB.');
+      toast.error('File is too large. Maximum size is 2MB.');
       return false;
     }
 
@@ -38,6 +38,13 @@ export default function ImageUpload({ initialImage, onImageSelected }: Props) {
 
     if (!validateFile(file)) {
       return;
+    }
+    
+    const maxSize = 2 * 1024 * 1024; // 2MB
+        
+    if (file && file.size > maxSize) {
+        toast.error('Image size must be less than 2MB');
+        return;
     }
 
     setIsLoading(true);
@@ -141,7 +148,7 @@ export default function ImageUpload({ initialImage, onImageSelected }: Props) {
               <p className="pl-1">or drag and drop</p>
             </div>
             <p className="text-xs text-gray-500">
-              PNG, JPG, GIF, WebP up to 10MB
+              PNG, JPG, GIF, WebP up to 2MB
             </p>
           </div>
         )}
