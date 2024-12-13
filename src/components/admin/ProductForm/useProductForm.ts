@@ -45,6 +45,12 @@ export function useProductForm({ onSuccess, initialData, productId }: UseProduct
   });
 
   const handleImageChange = (file: File | null) => {
+    const maxSize = 2 * 1024 * 1024; // 2MB
+        
+    if (file && file.size > maxSize) {
+        toast.error('Image size must be less than 2MB');
+        return;
+    }
     setImageFile(file);
     if (file) {
       const reader = new FileReader();
