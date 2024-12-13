@@ -5,6 +5,7 @@ import type { Database } from '../../types/supabase';
 import { useStore } from '../store';
 import { saveSession, clearSession } from './sessionStorage';
 import LoadingScreen from '../../components/common/LoadingScreen';
+import { signOut as authSignOut } from '../auth';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -56,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         };
         if (!state.initialized) initialize();
-    }, [setUser]);
+    }, [setUser]);// eslint-disable-line react-hooks/exhaustive-deps
 
     const fetchProfile = async (userId: string) => {
         try {
@@ -128,6 +129,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 loading: false,
                 initialized: true
             });
+            await authSignOut();
+            
         } catch (error) {
             setState(prev => ({ ...prev, loading: false }));
             throw error;
@@ -179,6 +182,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
     const context = useContext(AuthContext);
     if (context === undefined) {
