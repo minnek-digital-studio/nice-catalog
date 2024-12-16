@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '../../lib/store';
 import AdminLayout from '../../components/admin/AdminLayout';
 import CatalogForm from '../../components/admin/CatalogForm';
@@ -7,13 +7,17 @@ import SubscriptionLimitWarning from '../../components/admin/SubscriptionLimitWa
 import { Plus, Book, Globe, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { signOut } from '../../lib/auth';
+import { useAuth } from '../../lib/auth/AuthProvider';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function CatalogsPage() {
   const { user, catalogs, fetchCatalogs, updateCatalog } = useStore();
   const [showCatalogForm, setShowCatalogForm] = useState(false);
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
-
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
+  
   useEffect(() => {
     fetchCatalogs();
   }, [fetchCatalogs]);
@@ -22,9 +26,13 @@ export default function CatalogsPage() {
     try {
       await updateCatalog(id, { is_published: !isPublished });
       toast.success(isPublished ? 'Catalog unpublished' : 'Catalog published');
-    } catch (error: any) {
-      if (error.message?.includes('Catalog limit reached')) {
-        setSubscriptionError(error.message);
+    } catch (error: unknown) {
+      if( error instanceof Error) {
+        if (error.message?.includes('Catalog limit reached')) {
+          setSubscriptionError(error.message);
+        } else {
+          toast.error('Failed to update catalog');
+        }
       } else {
         toast.error('Failed to update catalog');
       }
@@ -34,9 +42,15 @@ export default function CatalogsPage() {
   const handleSignOut = async () => {
     try {
       await signOut();
+      navigate('/');
       toast.success('Signed out successfully');
-    } catch (error) {
-      toast.error('Failed to sign out');
+    } catch (error: unknown) {
+      
+      if (error instanceof Error) {
+        toast.error(error.message || 'Failed to sign out');
+      } else {
+        toast.error('Failed to sign out');
+      }
     }
   };
 
@@ -103,7 +117,7 @@ export default function CatalogsPage() {
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-medium text-gray-900">{catalog.name}</h3>
                       <button
-                        onClick={() => handleTogglePublish(catalog.id, catalog.is_published)}
+                        onClick={() => handleTogglePublish(catalog.id, catalog.is_published as boolean)}
                         className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                           catalog.is_published
                             ? 'bg-green-100 text-green-800'
