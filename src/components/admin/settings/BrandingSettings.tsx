@@ -28,6 +28,12 @@ export default function BrandingSettings() {
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+        
+    if (file && file.size > maxSize) {
+        toast.error('Image size must be less than 2MB');
+        return;
+    }
     if (file) {
       setLogoFile(file);
       setLogoPreview(URL.createObjectURL(file));
@@ -116,7 +122,7 @@ export default function BrandingSettings() {
                 </label>
                 <p className="pl-1">or drag and drop</p>
               </div>
-              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
             </div>
           )}
         </div>

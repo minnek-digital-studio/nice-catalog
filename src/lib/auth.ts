@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { useStore } from './store';
 import type { SignUpData } from '../types';
+import { clearSession } from './auth/sessionStorage';
 
 export async function signUp({ email, password, fullName, username }: SignUpData) {
   const { data: auth, error: signUpError } = await supabase.auth.signUp({
@@ -57,6 +58,7 @@ export async function signOut() {
   useStore.getState().setUser(null);
   localStorage.removeItem('catalogFormDraft');
   localStorage.removeItem('productFormDraft');
+  clearSession();
 }
 
 export async function initializeAuth() {
