@@ -1,19 +1,30 @@
-import React, { useState } from 'react';
-import { useStore } from '../../lib/store';
-import { Plus, Search, Filter, MoreVertical, Edit2, Trash2, GripVertical } from 'lucide-react';
-import ProductModal from './ProductModal';
-import DeleteConfirmationModal from './DeleteConfirmationModal';
-import ProductImage from '../ProductImage';
-import { toast } from 'react-hot-toast';
-import { Menu, Transition } from '@headlessui/react';
-import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import type { Database } from '../../types/supabase';
-import { Eye, EyeOff } from 'lucide-react';
+import { useCallback, useState, useEffect } from "react";
+import { useStore } from "../../lib/store";
+import {
+    Plus,
+    Search,
+    MoreVertical,
+    Edit2,
+    Trash2,
+    GripVertical,
+} from "lucide-react";
+import ProductModal from "./ProductModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import ProductImage from "../ProductImage";
+import { toast } from "react-hot-toast";
+import { Menu, Transition } from "@headlessui/react";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+    useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import type { Database } from "../../types/supabase";
+import { Eye, EyeOff } from "lucide-react";
 
-type Product = Database['public']['Tables']['products']['Row'] & {
-    category?: Database['public']['Tables']['categories']['Row'] | null;
+type Product = Database["public"]["Tables"]["products"]["Row"] & {
+    category?: Database["public"]["Tables"]["categories"]["Row"] | null;
 };
 
 interface SortableRowProps {
@@ -24,8 +35,15 @@ interface SortableRowProps {
     onToggleVisibility: (product: Product) => void;
 }
 
-function SortableRow({ id, product, onToggleVisibility, onEdit, onDelete }: SortableRowProps) {
-    const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+function SortableRow({
+    id,
+    product,
+    onToggleVisibility,
+    onEdit,
+    onDelete,
+}: SortableRowProps) {
+    const { attributes, listeners, setNodeRef, transform, transition } =
+        useSortable({ id });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -36,7 +54,11 @@ function SortableRow({ id, product, onToggleVisibility, onEdit, onDelete }: Sort
         <tr ref={setNodeRef} style={style} className="hover:bg-gray-50">
             <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
-                    <div {...attributes} {...listeners} className="cursor-grab mr-2">
+                    <div
+                        {...attributes}
+                        {...listeners}
+                        className="cursor-grab mr-2"
+                    >
                         <GripVertical className="w-4 h-4 text-gray-400" />
                     </div>
                     <ProductImage
@@ -46,18 +68,22 @@ function SortableRow({ id, product, onToggleVisibility, onEdit, onDelete }: Sort
                         className="flex-shrink-0"
                     />
                     <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{product.title}</div>
-                        <div className="text-sm text-gray-500">{product.brand}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                            {product.title}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                            {product.brand}
+                        </div>
                     </div>
                 </div>
             </td>
             <td className="px-6 py-4 whitespace-nowrap">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                    {product.category?.name || 'Uncategorized'}
+                    {product.category?.name || "Uncategorized"}
                 </span>
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {product.price !== null ? `$${product.price.toFixed(2)}` : '-'}
+                {product.price !== null ? `$${product.price.toFixed(2)}` : "-"}
             </td>
             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <Menu as="div" className="relative inline-block text-left">
@@ -77,13 +103,19 @@ function SortableRow({ id, product, onToggleVisibility, onEdit, onDelete }: Sort
                                 <Menu.Item>
                                     {({ active }) => (
                                         <button
-                                        onClick={() => onToggleVisibility(product)}
-                                        className={`${
-                                            active ? 'bg-gray-100' : ''
-                                        } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
+                                            onClick={() =>
+                                                onToggleVisibility(product)
+                                            }
+                                            className={`${
+                                                active ? "bg-gray-100" : ""
+                                            } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
                                         >
-                                        {product.visible ? (<EyeOff className="size-4 mr-2" /> ) : (<Eye className="size-4 mr-2" />)}
-                                        {product.visible ? 'Hide' : 'Show'}
+                                            {product.visible ? (
+                                                <EyeOff className="size-4 mr-2" />
+                                            ) : (
+                                                <Eye className="size-4 mr-2" />
+                                            )}
+                                            {product.visible ? "Hide" : "Show"}
                                         </button>
                                     )}
                                 </Menu.Item>
@@ -91,8 +123,9 @@ function SortableRow({ id, product, onToggleVisibility, onEdit, onDelete }: Sort
                                     {({ active }) => (
                                         <button
                                             onClick={() => onEdit(product)}
-                                            className={`${active ? 'bg-gray-100' : ''
-                                                } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
+                                            className={`${
+                                                active ? "bg-gray-100" : ""
+                                            } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
                                         >
                                             <Edit2 className="w-4 h-4 mr-2" />
                                             Edit
@@ -103,8 +136,9 @@ function SortableRow({ id, product, onToggleVisibility, onEdit, onDelete }: Sort
                                     {({ active }) => (
                                         <button
                                             onClick={() => onDelete(product)}
-                                            className={`${active ? 'bg-gray-100' : ''
-                                                } flex items-center w-full px-4 py-2 text-sm text-red-600`}
+                                            className={`${
+                                                active ? "bg-gray-100" : ""
+                                            } flex items-center w-full px-4 py-2 text-sm text-red-600`}
                                         >
                                             <Trash2 className="w-4 h-4 mr-2" />
                                             Delete
@@ -123,16 +157,31 @@ function SortableRow({ id, product, onToggleVisibility, onEdit, onDelete }: Sort
 export default function ProductList() {
     const [showModal, setShowModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<string>('');
-    const { products, categories, updateProduct } = useStore();
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(
+        null
+    );
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState<string>("");
+    const { products, categories, updateProduct, reorderProducts } = useStore();
 
-    const filteredProducts = products.filter(product => {
-        const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesCategory = !selectedCategory || product.category_id === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
+    const filterProducts = useCallback(() => {
+        return products.filter((product) => {
+            const matchesSearch = product.title
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase());
+            const matchesCategory = selectedCategory
+                ? product.category?.id === selectedCategory
+                : true;
+            return matchesSearch && matchesCategory;
+        });
+    }, [products, searchQuery, selectedCategory]);
+    const [filteredProducts, setfilteredProducts] = useState<Product[]>(
+        filterProducts()
+    );
+
+    useEffect(() => {
+        setfilteredProducts(filterProducts());
+    }, [filterProducts]);
 
     const handleEdit = (product: Product) => {
         setSelectedProduct(product);
@@ -148,28 +197,44 @@ export default function ProductList() {
         setShowModal(false);
         setSelectedProduct(null);
     };
-    
+
     const handleToggleVisibility = async (product: Product) => {
         try {
-          await updateProduct(product.id, { visible: !product.visible });
-          toast.success(product.visible ? 'Product hidden' : 'Product shown');
-        } catch (error) {
-          toast.error('Failed to update product visibility');
+            await updateProduct(product.id, { visible: !product.visible });
+            toast.success(product.visible ? "Product hidden" : "Product shown");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(
+                    error.message || "Failed to update product visibility"
+                );
+            } else {
+                toast.error("Failed to update product visibility");
+            }
         }
-      };
+    };
 
     const handleDragEnd = async (event: DragEndEvent) => {
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            const oldIndex = products.findIndex(p => p.id === active.id);
-            const newIndex = products.findIndex(p => p.id === over.id);
+            const oldIndex = products.findIndex((p) => p.id === active.id);
+            const newIndex = products.findIndex((p) => p.id === over.id);
+            const updatedProducts = [...products];
+            const [movedProduct] = updatedProducts.splice(oldIndex, 1);
+            updatedProducts.splice(newIndex, 0, movedProduct);
+            setfilteredProducts(updatedProducts);
 
             try {
-                await updateProduct(active.id as string, { position: newIndex });
-                toast.success('Product order updated');
+                await reorderProducts(active.id as string, newIndex);
+                toast.success("Product order updated");
             } catch (error) {
-                toast.error('Failed to update product order');
+                if (error instanceof Error) {
+                    toast.error(
+                        error.message || "Failed to update product order"
+                    );
+                } else {
+                    toast.error("Failed to update product order");
+                }
             }
         }
     };
@@ -208,8 +273,12 @@ export default function ProductList() {
                     <div className="bg-gray-100 rounded-full p-4 mb-4">
                         <Plus className="w-8 h-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">No products yet</h3>
-                    <p className="text-gray-500 mb-4">Get started by adding your first product</p>
+                    <h3 className="text-lg font-medium text-gray-900 mb-1">
+                        No products yet
+                    </h3>
+                    <p className="text-gray-500 mb-4">
+                        Get started by adding your first product
+                    </p>
                     <button
                         onClick={() => setShowModal(true)}
                         className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#ed1c24] hover:bg-[#d91920]"
@@ -244,7 +313,9 @@ export default function ProductList() {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     <SortableContext
-                                        items={filteredProducts.map(p => p.id)}
+                                        items={filteredProducts.map(
+                                            (p) => p.id
+                                        )}
                                         strategy={verticalListSortingStrategy}
                                     >
                                         {filteredProducts.map((product) => (
@@ -254,7 +325,9 @@ export default function ProductList() {
                                                 product={product}
                                                 onEdit={handleEdit}
                                                 onDelete={handleDelete}
-                                                onToggleVisibility={handleToggleVisibility}
+                                                onToggleVisibility={
+                                                    handleToggleVisibility
+                                                }
                                             />
                                         ))}
                                     </SortableContext>
