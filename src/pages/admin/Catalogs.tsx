@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '../../lib/store';
 import AdminLayout from '../../components/admin/AdminLayout';
 import CatalogForm from '../../components/admin/CatalogForm';
@@ -8,12 +8,16 @@ import SubscriptionLimitWarning from '../../components/admin/SubscriptionLimitWa
 import { Plus, Book, Globe, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import { signOut } from '../../lib/auth';
+import { useAuth } from '../../lib/auth/AuthProvider';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function CatalogsPage() {
   const { user, catalogs, fetchCatalogs, updateCatalog } = useStore();
   const [showCatalogForm, setShowCatalogForm] = useState(false);
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   useEffect(() => {
     fetchCatalogs();
@@ -35,12 +39,14 @@ export default function CatalogsPage() {
   const handleSignOut = async () => {
     try {
       await signOut();
+      navigate('/');
       toast.success('Signed out successfully');
     } catch (error: unknown) {
       if (error instanceof Error) {
-        console.error(error);
+        toast.error(error.message || 'Failed to sign out');
+      } else {
+        toast.error('Failed to sign out');
       }
-      toast.error('Failed to sign out');
     }
   };
 
