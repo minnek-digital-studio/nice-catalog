@@ -18,7 +18,7 @@ export default function CatalogUrlModal({ catalogId, currentUrl, onClose, onSucc
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isUrlValid || newUrl === currentUrl) {
       return;
     }
@@ -30,8 +30,12 @@ export default function CatalogUrlModal({ catalogId, currentUrl, onClose, onSucc
       toast.success('Catalog URL updated successfully');
       onSuccess();
       onClose();
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update catalog URL');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || 'Failed to update catalog URL');
+      } else {
+        toast.error('Failed to update catalog URL');
+      }
     } finally {
       setLoading(false);
     }

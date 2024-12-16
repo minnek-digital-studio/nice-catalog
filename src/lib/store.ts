@@ -23,6 +23,7 @@ interface StoreState {
   fetchCatalogs: () => Promise<void>;
   createCatalog: (catalog: Omit<Database['public']['Tables']['catalogs']['Insert'], 'user_id'>) => Promise<Catalog | null>;
   updateCatalog: (id: string, updates: Partial<Database['public']['Tables']['catalogs']['Update']>) => Promise<Catalog | null>;
+  deleteCatalog: (id: string) => Promise<void>;
   setCurrentCatalog: (catalog: Catalog | null) => void;
   fetchProducts: () => Promise<void>;
   fetchCategories: () => Promise<void>;
@@ -129,6 +130,24 @@ export const useStore = create<StoreState>((set, get) => ({
     }
   },
 
+  deleteCatalog: async (id) => {
+    try {
+      const { error } = await supabase
+        .from('catalogs')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      set((state) => ({
+        catalogs: state.catalogs.filter((c) => c.id !== id)
+      }));
+    } catch (error) {
+      console.error('Error deleting catalog:', error);
+      throw error;
+    }
+  },
+
   setCurrentCatalog: (catalog) => {
     set({ currentCatalog: catalog });
     if (catalog) {
@@ -144,7 +163,7 @@ export const useStore = create<StoreState>((set, get) => ({
       console.error('No catalog selected');
       return;
     }
-    
+
     try {
       const { data: products, error } = await supabase
         .from('products')
@@ -169,7 +188,7 @@ export const useStore = create<StoreState>((set, get) => ({
       console.error('No catalog selected');
       return;
     }
-    
+
     try {
       const { data: categories, error } = await supabase
         .from('categories')
@@ -191,7 +210,7 @@ export const useStore = create<StoreState>((set, get) => ({
       console.error('No catalog selected');
       return;
     }
-    
+
     try {
       const { data: brands, error } = await supabase
         .from('brands')
@@ -330,7 +349,7 @@ export const useStore = create<StoreState>((set, get) => ({
       throw error;
     }
   },
-  
+
   updateCategory: async (id, updates) => {
     try {
       const { data, error } = await supabase
@@ -394,7 +413,7 @@ export const useStore = create<StoreState>((set, get) => ({
       throw error;
     }
   },
-  
+
   updateBrand: async (id, updates) => {
     try {
       const { data, error } = await supabase
@@ -436,7 +455,7 @@ export const useStore = create<StoreState>((set, get) => ({
   reorderProducts: async (productId: string, newPosition: number) => {
     const products = get().products;
     const catalogId = get().currentCatalog?.id;
-    
+
     if (!catalogId) return;
 
     try {
