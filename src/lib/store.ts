@@ -12,31 +12,32 @@ type Catalog = Database["public"]["Tables"]["catalogs"]["Row"];
 type Brand = Database["public"]["Tables"]["brands"]["Row"];
 
 interface StoreState {
-    user: Profile | null;
-    catalogs: Catalog[];
-    currentCatalog: Catalog | null;
-    products: Product[];
-    categories: Category[];
-    brands: Brand[];
-    setUser: (user: Profile | null) => void;
-    updateProfile: (updates: Partial<Profile>) => Promise<void>;
-    fetchCatalogs: () => Promise<void>;
-    createCatalog: (catalog: Omit<Database['public']['Tables']['catalogs']['Insert'], 'user_id'>) => Promise<Catalog | null>;
-    updateCatalog: (id: string, updates: Partial<Database['public']['Tables']['catalogs']['Update']>) => Promise<Catalog | null>;
-    setCurrentCatalog: (catalog: Catalog | null) => void;
-    fetchProducts: () => Promise<void>;
-    fetchCategories: () => Promise<void>;
-    fetchBrands: () => Promise<void>;
-    createProduct: (product: Omit<Database['public']['Tables']['products']['Insert'], 'catalog_id'>) => Promise<Product | null>;
-    updateProduct: (id: string, updates: Partial<Database['public']['Tables']['products']['Update']>) => Promise<Product | null>;
-    reorderProducts: (productId: string, newPosition: number) => Promise<void>;
-    deleteProduct: (id: string) => Promise<boolean>;
-    createCategory: (category: Omit<Database['public']['Tables']['categories']['Insert'], 'catalog_id'>) => Promise<Category | null>;
-    updateCategory: (id: string, updates: Partial<Database['public']['Tables']['categories']['Update']>) => Promise<Category | null>;
-    deleteCategory: (id: string) => Promise<boolean>;
-    createBrand: (brand: Omit<Database['public']['Tables']['brands']['Insert'], 'catalog_id'>) => Promise<Brand | null>;
-    updateBrand: (id: string, updates: Partial<Database['public']['Tables']['brands']['Update']>) => Promise<Brand | null>;
-    deleteBrand: (id: string) => Promise<boolean>;
+  user: Profile | null;
+  catalogs: Catalog[];
+  currentCatalog: Catalog | null;
+  products: Product[];
+  categories: Category[];
+  brands: Brand[];
+  setUser: (user: Profile | null) => void;
+  updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  fetchCatalogs: () => Promise<void>;
+  createCatalog: (catalog: Omit<Database['public']['Tables']['catalogs']['Insert'], 'user_id'>) => Promise<Catalog | null>;
+  updateCatalog: (id: string, updates: Partial<Database['public']['Tables']['catalogs']['Update']>) => Promise<Catalog | null>;
+  deleteCatalog: (id: string) => Promise<void>;
+  setCurrentCatalog: (catalog: Catalog | null) => void;
+  fetchProducts: () => Promise<void>;
+  fetchCategories: () => Promise<void>;
+  fetchBrands: () => Promise<void>;
+  createProduct: (product: Omit<Database['public']['Tables']['products']['Insert'], 'catalog_id'>) => Promise<Product | null>;
+  updateProduct: (id: string, updates: Partial<Database['public']['Tables']['products']['Update']>) => Promise<Product | null>;
+  deleteProduct: (id: string) => Promise<boolean>;
+  createCategory: (category: Omit<Database['public']['Tables']['categories']['Insert'], 'catalog_id'>) => Promise<Category | null>;
+  updateCategory: (id: string, updates: Partial<Database['public']['Tables']['categories']['Update']>) => Promise<Category | null>;
+  deleteCategory: (id: string) => Promise<boolean>;
+  createBrand: (brand: Omit<Database['public']['Tables']['brands']['Insert'], 'catalog_id'>) => Promise<Brand | null>;
+  updateBrand: (id: string, updates: Partial<Database['public']['Tables']['brands']['Update']>) => Promise<Brand | null>;
+  deleteBrand: (id: string) => Promise<boolean>;
+  reorderProducts: (productId: string, newPosition: number) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -130,6 +131,24 @@ export const useStore = create<StoreState>((set, get) => ({
             return null;
         }
     },
+
+    deleteCatalog: async (id) => {
+        try {
+          const { error } = await supabase
+            .from('catalogs')
+            .delete()
+            .eq('id', id);
+
+          if (error) throw error;
+
+          set((state) => ({
+            catalogs: state.catalogs.filter((c) => c.id !== id)
+          }));
+        } catch (error) {
+          console.error('Error deleting catalog:', error);
+          throw error;
+        }
+},
 
     setCurrentCatalog: (catalog) => {
         set({ currentCatalog: catalog });
@@ -324,7 +343,7 @@ export const useStore = create<StoreState>((set, get) => ({
             const newProductList = newProducts.map((p, i) => {
                 if (affectedProducts.includes(p)) {
                     return { ...p, position: i + Math.min(oldIndex, newIndex) };
-                } 
+                }
                 return p;
             });
 
@@ -332,7 +351,7 @@ export const useStore = create<StoreState>((set, get) => ({
                 id: p.id,
                 position: i + Math.min(oldIndex, newIndex),
             }));
-            
+
             updateAffectedProducts.forEach(async (product) => {
                 const { error } = await supabase
                     .from("products")

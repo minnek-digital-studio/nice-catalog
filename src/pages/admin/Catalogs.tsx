@@ -3,6 +3,7 @@ import { useStore } from '../../lib/store';
 import AdminLayout from '../../components/admin/AdminLayout';
 import CatalogForm from '../../components/admin/CatalogForm';
 import TopNav from '../../components/admin/TopNav';
+import CatalogOptions from '../../components/admin/CatalogOptions';
 import SubscriptionLimitWarning from '../../components/admin/SubscriptionLimitWarning';
 import { Plus, Book, Globe, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -17,7 +18,7 @@ export default function CatalogsPage() {
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  
+
   useEffect(() => {
     fetchCatalogs();
   }, [fetchCatalogs]);
@@ -27,12 +28,8 @@ export default function CatalogsPage() {
       await updateCatalog(id, { is_published: !isPublished });
       toast.success(isPublished ? 'Catalog unpublished' : 'Catalog published');
     } catch (error: unknown) {
-      if( error instanceof Error) {
-        if (error.message?.includes('Catalog limit reached')) {
-          setSubscriptionError(error.message);
-        } else {
-          toast.error('Failed to update catalog');
-        }
+      if (error instanceof Error && error.message?.includes('Catalog limit reached')) {
+        setSubscriptionError(error.message);
       } else {
         toast.error('Failed to update catalog');
       }
@@ -45,7 +42,6 @@ export default function CatalogsPage() {
       navigate('/');
       toast.success('Signed out successfully');
     } catch (error: unknown) {
-      
       if (error instanceof Error) {
         toast.error(error.message || 'Failed to sign out');
       } else {
@@ -111,33 +107,39 @@ export default function CatalogsPage() {
               {catalogs.map((catalog) => (
                 <div
                   key={catalog.id}
-                  className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200"
+                  className="bg-white rounded-lg shadow-sm border border-gray-200"
                 >
                   <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-medium text-gray-900">{catalog.name}</h3>
-                      <button
-                        onClick={() => handleTogglePublish(catalog.id, catalog.is_published as boolean)}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                          catalog.is_published
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-gray-100 text-gray-800'
-                        }`}
-                      >
-                        {catalog.is_published ? (
-                          <>
-                            <Globe className="w-3 h-3 mr-1" />
-                            Published
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="w-3 h-3 mr-1" />
-                            Private
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => handleTogglePublish(catalog.id, !!catalog.is_published)}
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            catalog.is_published
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
+                          {catalog.is_published ? (
+                            <>
+                              <Globe className="w-3 h-3 mr-1" />
+                              Published
+                            </>
+                          ) : (
+                            <>
+                              <Lock className="w-3 h-3 mr-1" />
+                              Private
+                            </>
+                          )}
+                        </button>
+                        <CatalogOptions
+                          catalog={catalog}
+                          onUpdate={fetchCatalogs}
+                        />
+                      </div>
                     </div>
-                    
+
                     <p className="text-sm text-gray-500 mb-4">
                       {catalog.description || 'No description provided'}
                     </p>
