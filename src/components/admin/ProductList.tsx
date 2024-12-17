@@ -360,7 +360,10 @@ export default function ProductList() {
             {showDeleteModal && selectedProduct && (
                 <DeleteConfirmationModal
                     product={selectedProduct}
-                    onClose={() => setShowDeleteModal(false)}
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setSelectedProduct(null);
+                    }}
                 />
             )}
         </div>
