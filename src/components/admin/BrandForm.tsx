@@ -133,11 +133,12 @@ const BrandForm = ({ onClose, initialData }: Props) => {
                                         type="file"
                                         className="sr-only"
                                         accept="image/*"
-                                        onChange={(e) =>
-                                            setLogoFile(
-                                                e.target.files?.[0] || null
-                                            )
-                                        }
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                handleImageChange(file);
+                                            }
+                                        }}
                                     />
                                 </label>
                                 <p className="pl-1">or drag and drop</p>
