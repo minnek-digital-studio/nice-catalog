@@ -95,8 +95,12 @@ export default function CatalogsPage() {
           <div className="space-y-8">
             <div className="flex justify-end">
               <button
-                onClick={() => setShowCatalogForm(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#ed1c24] hover:bg-[#d91920]"
+                onClick={() => {
+                  if (subscriptionError) return;
+                  setShowCatalogForm(true)
+                }}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[#ed1c24] hover:bg-[#d91920] disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={subscriptionError !== null}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 New Catalog

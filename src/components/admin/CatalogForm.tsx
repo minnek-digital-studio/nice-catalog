@@ -44,9 +44,9 @@ export default function CatalogForm({ onSuccess, onError, onCancel, initialData 
       } as CatalogInsert);
 
       onSuccess?.();
-    } catch (error: any) {
-      onError?.(error);
-      console.error('Error creating catalog:', error);
+    } catch (error) {
+        onError?.(error as Error);
+        console.error('Error creating catalog:', error);
     } finally {
       setLoading(false);
     }

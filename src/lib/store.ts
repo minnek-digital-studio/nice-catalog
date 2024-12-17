@@ -89,25 +89,20 @@ export const useStore = create<StoreState>((set, get) => ({
     },
 
     createCatalog: async (catalog) => {
-        try {
-            const { data, error } = await supabase
-                .from("catalogs")
-                .insert({
-                    ...catalog,
-                    user_id: get().user?.id as string,
-                })
-                .select()
-                .single();
+        const { data, error } = await supabase
+            .from("catalogs")
+            .insert({
+                ...catalog,
+                user_id: get().user?.id as string,
+            })
+            .select()
+            .single();
 
-            if (error) throw error;
+        if (error) throw error;
 
-            const catalogs = get().catalogs;
-            set({ catalogs: [data, ...catalogs] });
-            return data;
-        } catch (error) {
-            console.error("Error creating catalog:", error);
-            return null;
-        }
+        const catalogs = get().catalogs;
+        set({ catalogs: [data, ...catalogs] });
+        return data;
     },
 
     updateCatalog: async (id, updates) => {
