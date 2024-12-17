@@ -105,6 +105,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                 description: data.description,
                 price: data.show_price ? data.price : null,
                 brand: selectedBrand?.name || '',
+                brand_id: data.brand_id,
                 category_id: data.category_id,
                 image_url: imageUrl,
                 slug,

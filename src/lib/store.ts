@@ -167,7 +167,8 @@ export const useStore = create<StoreState>((set, get) => ({
                 .select(
                     `
           *,
-          category:categories(*)
+          category:categories(*),
+          brand_obj:brands(*)
         `
                 )
                 .eq("catalog_id", catalogId)
@@ -257,7 +258,8 @@ export const useStore = create<StoreState>((set, get) => ({
                 .select(
                     `
           *,
-          category:categories(*)
+          category:categories(*),
+          brand_obj:brands(*)
         `
                 )
                 .single();
@@ -296,7 +298,8 @@ export const useStore = create<StoreState>((set, get) => ({
                 .select(
                     `
           *,
-          category:categories(*)
+          category:categories(*),
+          brand_obj:brands(*)
         `
                 )
                 .single();
