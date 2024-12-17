@@ -16,7 +16,7 @@ type Product = Partial<Database["public"]["Tables"]["products"]["Update"]>;
 
 const schema = z.object({
     title: z.string().min(1, 'Product name is required'),
-    description: z.string().min(1, 'Description is required'),
+    description: z.string().optional(),
     price: z.number().min(0, 'Price must be positive').optional().nullable(),
     brand_id: z.string().optional(),
     category_id: z.string().min(1, 'Category is required'),
@@ -52,6 +52,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
         defaultValues: {
             show_price: true,
             ...initialData,
+            price: initialData?.price || null,
         }
     });
 
@@ -79,8 +80,6 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
             setImagePreview(null);
         }
     };
-
-    const showPrice = watch('show_price');
     const formData = watch();
 
     const onSubmit = async (data: FormData) => {
@@ -103,10 +102,11 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
             const productData = {
                 title: data.title,
                 description: data.description,
-                price: data.show_price ? data.price : null,
+                price: data.price || null,
                 brand: selectedBrand?.name || '',
-                brand_id: data.brand_id,
+                brand_id: data.brand_id || null,
                 category_id: data.category_id,
+                is_visible: data.show_price,
                 image_url: imageUrl,
                 slug,
             } as Product;
@@ -154,7 +154,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
 
                     <div>
                         <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                            Description *
+                            Description
                         </label>
                         <textarea
                             id="description"
@@ -180,30 +180,27 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                                 Display price
                             </label>
                         </div>
-
-                        {showPrice && (
-                            <div>
-                                <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Price
-                                </label>
-                                <div className="relative rounded-lg shadow-sm">
-                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                        <span className="text-gray-500 sm:text-sm">$</span>
-                                    </div>
-                                    <input
-                                        type="number"
-                                        id="price"
-                                        step="0.01"
-                                        {...register('price', { valueAsNumber: true })}
-                                        className="block w-full pl-8 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
-                                        placeholder="0.00"
-                                    />
+                        <div>
+                            <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-2">
+                                Price
+                            </label>
+                            <div className="relative rounded-lg shadow-sm">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <span className="text-gray-500 sm:text-sm">$</span>
                                 </div>
-                                {errors.price && (
-                                    <p className="mt-2 text-sm text-red-600">{errors.price.message}</p>
-                                )}
+                                <input
+                                    type="number"
+                                    id="price"
+                                    step="0.01"
+                                    {...register('price')}
+                                    className="block w-full pl-8 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+                                    placeholder="0.00"
+                                />
                             </div>
-                        )}
+                            {errors.price && (
+                                <p className="mt-2 text-sm text-red-600">{errors.price.message}</p>
+                            )}
+                        </div>
                     </div>
                 </div>
 
