@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDebounce } from '../../hooks/useDebounce';
 import { checkCatalogUrlAvailability } from '../../lib/api';
 import { catalogUrlSchema } from '../../lib/validators';
@@ -70,7 +70,7 @@ export default function CatalogUrlInput({ value, onChange, onValidityChange, ini
       </label>
       <div className="mt-1 relative">
         <div className="flex rounded-md shadow-sm">
-          <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+          <span className="inline-flex items-center px-3 py-2 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
             /{user?.username}/
           </span>
           <input
@@ -78,7 +78,7 @@ export default function CatalogUrlInput({ value, onChange, onValidityChange, ini
             id="catalogUrl"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className={`flex-1 rounded-none rounded-r-md sm:text-sm ${
+            className={`flex-1 rounded-none rounded-r-md sm:text-sm border px-3 ${
               validationError || !isAvailable
                 ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
                 : isAvailable

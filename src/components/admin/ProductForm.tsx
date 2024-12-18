@@ -144,7 +144,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                             type="text"
                             id="title"
                             {...register('title')}
-                            className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+                            className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
                             placeholder="Enter product name"
                         />
                         {errors.title && (
@@ -160,7 +160,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                             id="description"
                             rows={4}
                             {...register('description')}
-                            className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+                            className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
                             placeholder="Enter product description"
                         />
                         {errors.description && (
@@ -193,7 +193,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                                     id="price"
                                     step="0.01"
                                     {...register('price')}
-                                    className="block w-full pl-8 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+                                    className="block w-full pl-8 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
                                     placeholder="0.00"
                                 />
                             </div>
@@ -209,10 +209,10 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Category *
                         </label>
-                        <div className="flex rounded-lg shadow-sm">
+                        <div className="flex rounded-lg shadow-sm border border-gray-300 gap-2">
                             <select
                                 {...register('category_id')}
-                                className="flex-1 w-full px-4 py-3 rounded-l-lg border-gray-300 focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+                                className="flex-1 w-full px-4 py-3 rounded-l-lg border-gray-300 focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm "
                             >
                                 <option value="">Select a category</option>
                                 {categories?.map((category) => (
@@ -221,13 +221,14 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                                     </option>
                                 ))}
                             </select>
-                            <button
-                                type="button"
-                                onClick={() => setShowCategoryModal(true)}
-                                className="relative -ml-px inline-flex items-center px-4 py-3 rounded-r-lg border border-gray-300 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-[#ed1c24]"
-                            >
-                                <Plus className="h-5 w-5" />
-                            </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCategoryModal(true)}
+                                    className="relative -ml-px inline-flex items-center px-4 py-3 rounded-r-lg border-l border-gray-300 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-[#ed1c24]"
+                                >
+                                    <Plus className="h-5 w-5" />
+                                    
+                                </button>
                         </div>
                         {errors.category_id && (
                             <p className="mt-2 text-sm text-red-600">{errors.category_id.message}</p>
@@ -238,7 +239,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Brand
                         </label>
-                        <div className="flex rounded-lg shadow-sm">
+                        <div className="flex rounded-lg shadow-sm border border-gray-300 gap-2">
                             <select
                                 {...register('brand_id')}
                                 className="flex-1 w-full px-4 py-3 rounded-l-lg border-gray-300 focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
@@ -253,7 +254,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                             <button
                                 type="button"
                                 onClick={() => setShowBrandModal(true)}
-                                className="relative -ml-px inline-flex items-center px-4 py-3 rounded-r-lg border border-gray-300 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-[#ed1c24]"
+                                className="relative -ml-px inline-flex items-center px-4 py-3 rounded-r-lg border-l border-gray-300 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-[#ed1c24]"
                             >
                                 <Plus className="h-5 w-5" />
                             </button>
