@@ -4,6 +4,7 @@ import { Plus, Trash2, Building2, Pencil } from "lucide-react";
 import BrandModal from "./BrandModal";
 import { toast } from "react-hot-toast";
 import type { Database } from "../../types/supabase";
+import DeleteConfirmation from "./DeleteConfirmation";
 
 type Brand = Database["public"]["Tables"]["brands"]["Row"];
 
@@ -11,22 +12,21 @@ export default function BrandList() {
     const [showModal, setShowModal] = useState(false);
     const { brands, fetchBrands, deleteBrand } = useStore();
     const [selectedBrand, setSelectedBrand] = useState<Brand | null>(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         fetchBrands();
     }, [fetchBrands]);
 
     const handleDelete = async (id: string) => {
-        if (window.confirm("Are you sure you want to delete this brand?")) {
-            try {
-                await deleteBrand(id);
-                toast.success("Brand deleted successfully");
-            } catch (error: unknown) {
-                if (error instanceof Error) {
-                    toast.error(error.message || "Failed to delete brand");
-                } else {
-                    toast.error("Failed to delete brand");
-                }
+        try {
+            await deleteBrand(id);
+            toast.success("Brand deleted successfully");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(error.message || "Failed to delete brand");
+            } else {
+                toast.error("Failed to delete brand");
             }
         }
     };
@@ -79,7 +79,10 @@ export default function BrandList() {
                                     </button>
 
                                     <button
-                                        onClick={() => handleDelete(brand.id)}
+                                        onClick={() => {
+                                            setSelectedBrand(brand);
+                                            setShowDeleteModal(true);
+                                        }}
                                         className="p-1 text-gray-400 hover:text-red-500"
                                     >
                                         <Trash2 className="w-5 h-5" />
@@ -103,6 +106,21 @@ export default function BrandList() {
                         setSelectedBrand(null);
                     }}
                     brand={selectedBrand}
+                />
+            )}
+            
+            {showDeleteModal && (
+                <DeleteConfirmation
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setSelectedBrand(null);
+                    }}
+                    onConfirm={handleDelete}
+                    obj={{
+                        id: selectedBrand?.id || "",
+                        title: selectedBrand?.name || "",
+                        type: "brand",
+                    }}
                 />
             )}
         </div>
