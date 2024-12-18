@@ -64,17 +64,11 @@ serve(async (req) => {
         if (user_sub) {
             if (user_sub.stripe_subscription_id != stripeId) {
                 if (user_sub.stripe_subscription_id) {
-                    const { error } = await supabaseAdmin.functions.invoke('cancel-subscription', {
-                        body: {
-                            stripeId: user_sub?.stripe_subscription_id,
-                            subscriptionId: user_sub?.id,
-                        },
-                        headers: {
-                            Authorization: authHeader,
+                    // Retrieve the previous stripe subscription
+                    const { subscription: stripeSubscription } = await stripe.checkout.sessions.retrieve(user_sub.stripe_subscription_id);
 
-                        },
-                    });
-                    if (error) throw error;
+                    // Cancel previous stripe subscription
+                    await stripe.subscriptions.cancel(stripeSubscription);
                 }
 
                 await supabaseAdmin.from('user_subscriptions').update({
@@ -107,7 +101,7 @@ serve(async (req) => {
             }
         );
     } catch (error) {
-        console.error('Checkout session creation failed:', error);
+        console.error('Subscription creation failed:', error);
         return new Response(
             JSON.stringify({ error: error.message }),
             {
