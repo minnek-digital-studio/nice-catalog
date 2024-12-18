@@ -3,9 +3,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
 import Stripe from 'https://esm.sh/stripe@13.11.0';
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
-        apiVersion: '2023-10-16',
-        httpClient: Stripe.createFetchHttpClient(),
-    });
+    apiVersion: '2023-10-16',
+    httpClient: Stripe.createFetchHttpClient(),
+});
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -55,60 +55,52 @@ serve(async (req) => {
         }
 
         // Parse request body
-        const { priceId, successUrl, cancelUrl, hash } = await req.json();
-        if (!priceId) {
+        const { planId, stripeId, customerId } = await req.json();
+        if (!planId || !stripeId || !customerId) {
             throw new Error('Missing required parameters');
         }
 
-        // Get or create Stripe customer
-        const { data: subscription } = await supabaseAdmin
-            .from('user_subscriptions')
-            .select('stripe_customer_id')
-            .eq('user_id', user.id)
-            .maybeSingle();
+        const { data: user_sub } = await supabaseAdmin.from('user_subscriptions').select('id, stripe_subscription_id').eq('user_id', user.id).single();
+        if (user_sub) {
+            if (user_sub.stripe_subscription_id != stripeId) {
+                if (user_sub.stripe_subscription_id) {
+                    const { error } = await supabaseAdmin.functions.invoke('cancel-subscription', {
+                        body: {
+                            stripeId: user_sub?.stripe_subscription_id,
+                            subscriptionId: user_sub?.id,
+                        },
+                        headers: {
+                            Authorization: authHeader,
 
-        const { data: plan } = await supabaseAdmin
-            .from('subscription_plans')
-            .select('id')
-            .eq('stripe_price_id', priceId)
-            .single();
+                        },
+                    });
+                    if (error) throw error;
+                }
 
-        let customerId = subscription?.stripe_customer_id;
-
-        if (!customerId) {
-            const customer = await stripe.customers.create({
-                email: user.email,
-                metadata: {
-                    supabaseUid: user.id,
-                },
+                await supabaseAdmin.from('user_subscriptions').update({
+                    plan_id: planId,
+                    status: 'active',
+                    current_period_start: new Date(),
+                    current_period_end: new Date(),
+                    cancel_at_period_end: false,
+                    stripe_subscription_id: stripeId,
+                }).eq('id', user_sub.id);
+            }
+        } else {
+            const s = await supabaseAdmin.from('user_subscriptions').insert({
+                user_id: user.id,
+                plan_id: planId,
+                stripe_customer_id: customerId,
+                status: 'active',
+                current_period_start: new Date(),
+                current_period_end: new Date(),
+                cancel_at_period_end: false,
+                stripe_subscription_id: stripeId,
             });
-            customerId = customer.id;
         }
 
-        // Create Stripe checkout session
-        const session = await stripe.checkout.sessions.create({
-            customer: customerId,
-            line_items: [
-                {
-                    price: priceId,
-                    quantity: 1,
-                },
-            ],
-            mode: 'subscription',
-            success_url: `${successUrl}?success=true&session_id={CHECKOUT_SESSION_ID}&plan_id=${plan.id}&customer_id=${customerId}${hash}`,
-            cancel_url: `${cancelUrl}?success=false${hash}`,
-            allow_promotion_codes: true,
-            billing_address_collection: 'required',
-            payment_method_types: ['card'],
-            subscription_data: {
-                metadata: {
-                    supabaseUid: user.id,
-                },
-            },
-        });
-
         return new Response(
-            JSON.stringify({ sessionId: session.id }),
+            JSON.stringify({ ok: true }),
             {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 status: 200,

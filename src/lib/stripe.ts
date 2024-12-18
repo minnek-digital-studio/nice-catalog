@@ -17,7 +17,7 @@ export async function createCheckoutSession(priceId: string) {
         const successUrl = new URL('/admin/settings', window.location.origin).href;
         const cancelUrl = new URL('/admin/settings', window.location.origin).href;
         const { data: { sessionId } } = await supabase.functions.invoke('create-checkout-session', {
-            body: { priceId, successUrl, cancelUrl },
+            body: { priceId, successUrl, cancelUrl, hash: '#plans' },
             headers: {
                 Authorization: `Bearer ${session.access_token}`,
 
@@ -91,6 +91,32 @@ export async function cancelSubscription() {
         if (error) throw error;
     } catch (error) {
         console.error('Error canceling subscription:', error);
+        throw error;
+    }
+}
+
+export async function createSubscription(stripeId: string, planId: string, customerId: string) {
+    try {
+        const { data: { session }, error: authError } = await supabase.auth.getSession();
+
+        if (authError) throw new Error('Authentication required');
+        if (!session?.user) throw new Error('Please log in to unsubscribe');
+
+        const { error } = await supabase.functions.invoke('create-subscription', {
+            body: {
+                stripeId,
+                planId,
+                customerId,
+            },
+            headers: {
+                Authorization: `Bearer ${session.access_token}`,
+
+            },
+        });
+
+        if (error) throw error;
+    } catch (error) {
+        console.error('Error creating subscription:', error);
         throw error;
     }
 }
