@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../../lib/store";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,6 +6,7 @@ import CategoryModal from "./CategoryModal";
 import { toast } from "react-hot-toast";
 import type { IconName } from "@fortawesome/fontawesome-svg-core";
 import type { Database } from "../../types/supabase";
+import DeleteConfirmation from "./DeleteConfirmation";
 
 type Category = Database["public"]["Tables"]["categories"]["Update"];
 
@@ -15,22 +16,21 @@ export default function CategoryList() {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(
         null
     );
+    const [ showDeleteModal, setShowDeleteModal ] = useState(false);
 
     useEffect(() => {
         fetchCategories();
     }, [fetchCategories]);
 
     const handleDelete = async (id: string) => {
-        if (window.confirm("Are you sure you want to delete this category?")) {
-            try {
-                await deleteCategory(id);
-                toast.success("Category deleted successfully");
-            } catch (error: unknown) {
-                if (error instanceof Error) {
-                    toast.error(error.message || "Failed to delete category");
-                } else {
-                    toast.error("Failed to delete category");
-                }
+        try {
+            await deleteCategory(id);
+            toast.success("Category deleted successfully");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(error.message || "Failed to delete category");
+            } else {
+                toast.error("Failed to delete category");
             }
         }
     };
@@ -87,9 +87,10 @@ export default function CategoryList() {
                                     </button>
 
                                     <button
-                                        onClick={() =>
-                                            handleDelete(category.id)
-                                        }
+                                        onClick={() => {
+                                            setSelectedCategory(category)
+                                            setShowDeleteModal(true)
+                                        }}
                                         className="p-1 text-gray-400 hover:text-red-500"
                                     >
                                         <Trash2 className="w-5 h-5" />
@@ -114,6 +115,21 @@ export default function CategoryList() {
                         setSelectedCategory(null);
                     }}
                     category={selectedCategory}
+                />
+            )}
+            
+            {showDeleteModal && (
+                <DeleteConfirmation
+                    obj={{
+                        id: selectedCategory?.id || "",
+                        title: selectedCategory?.name || "",
+                        type: "category",
+                    }}
+                    onClose={() => {
+                        setShowDeleteModal(false);
+                        setSelectedCategory(null);
+                    }}
+                    onConfirm={handleDelete}
                 />
             )}
         </div>
