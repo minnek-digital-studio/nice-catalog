@@ -1,4 +1,3 @@
-import React from 'react';
 import { useStore } from '../../../lib/store';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,8 +32,12 @@ export default function ProfileSettings() {
     try {
       await updateProfile(data);
       toast.success('Profile updated successfully');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        toast.error(error.message || 'Failed to update profile');
+      } else {
+        toast.error('Failed to update profile');
+      }
     }
   };
 
@@ -48,7 +51,7 @@ export default function ProfileSettings() {
           type="text"
           id="full_name"
           {...register('full_name')}
-          className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+          className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
         />
         {errors.full_name && (
           <p className="mt-1 text-sm text-red-600">{errors.full_name.message}</p>
@@ -63,7 +66,7 @@ export default function ProfileSettings() {
           type="email"
           id="email"
           {...register('email')}
-          className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+          className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
         />
         {errors.email && (
           <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>

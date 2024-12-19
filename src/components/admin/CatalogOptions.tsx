@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MoreVertical, Edit2, Trash2, Link } from 'lucide-react';
 import { Menu, Transition } from '@headlessui/react';
 import CatalogEditModal from './CatalogEditModal';

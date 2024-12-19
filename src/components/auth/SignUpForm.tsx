@@ -125,7 +125,7 @@ export default function SignUpForm() {
                     value={formData.fullName}
                     onChange={(e) => handleChange("fullName", e.target.value)}
                     onBlur={() => handleBlur("fullName")}
-                    className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+                    className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm px-4 py-3 border ${
                         touched.fullName && errors.fullName
                             ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                             : "border-gray-300 focus:ring-[#ed1c24] focus:border-[#ed1c24]"
@@ -152,7 +152,7 @@ export default function SignUpForm() {
                     value={formData.email}
                     onChange={(e) => handleChange("email", e.target.value)}
                     onBlur={() => handleBlur("email")}
-                    className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm ${
+                    className={`mt-1 block w-full rounded-md shadow-sm sm:text-sm px-4 py-3 border ${
                         touched.email && errors.email
                             ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                             : "border-gray-300 focus:ring-[#ed1c24] focus:border-[#ed1c24]"
@@ -179,7 +179,7 @@ export default function SignUpForm() {
                             handleChange("password", e.target.value)
                         }
                         onBlur={() => handleBlur("password")}
-                        className={`block w-full pr-10 rounded-md shadow-sm sm:text-sm ${
+                        className={`block w-full pr-10 rounded-md shadow-sm sm:text-sm px-4 py-3 border ${
                             touched.password && errors.password
                                 ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                                 : "border-gray-300 focus:ring-[#ed1c24] focus:border-[#ed1c24]"

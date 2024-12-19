@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDebounce } from '../../hooks/useDebounce';
 import { checkUsernameAvailability } from '../../lib/api';
 import { usernameSchema } from '../../lib/validators';
@@ -64,7 +64,7 @@ export default function UsernameInput({ value, onChange, onValidityChange }: Pro
           id="username"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`block w-full pr-10 rounded-md shadow-sm sm:text-sm ${
+          className={`block w-full pr-10 rounded-md shadow-sm sm:text-sm px-4 py-3 border ${
             validationError || !isAvailable
               ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
               : isAvailable
