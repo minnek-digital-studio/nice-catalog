@@ -1,22 +1,27 @@
 import { useEffect, useState } from "react";
 import { useStore } from "../../lib/store";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Plus } from "lucide-react";
 import CategoryModal from "./CategoryModal";
 import { toast } from "react-hot-toast";
-import type { IconName } from "@fortawesome/fontawesome-svg-core";
 import type { Database } from "../../types/supabase";
 import DeleteConfirmation from "./DeleteConfirmation";
+import SortableRow from "./Category/SortableRow";
+import {
+    SortableContext,
+    verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 
-type Category = Database["public"]["Tables"]["categories"]["Update"];
+export type Category = Database["public"]["Tables"]["categories"]["Update"];
 
 export default function CategoryList() {
     const [showModal, setShowModal] = useState(false);
-    const { categories, fetchCategories, deleteCategory } = useStore();
+    const { categories, fetchCategories, reorderCategories, deleteCategory } =
+        useStore();
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(
         null
     );
-    const [ showDeleteModal, setShowDeleteModal ] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     useEffect(() => {
         fetchCategories();
@@ -40,6 +45,31 @@ export default function CategoryList() {
         setShowModal(true);
     };
 
+    const handleDragEnd = async (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            const oldIndex = categories.findIndex((c) => c.id === active.id);
+            const newIndex = categories.findIndex((c) => c.id === over.id);
+            const updatedCategorys = [...categories];
+            const [movedCategory] = updatedCategorys.splice(oldIndex, 1);
+            updatedCategorys.splice(newIndex, 0, movedCategory);
+
+            try {
+                await reorderCategories(active.id as string, newIndex);
+                toast.success("Category order updated");
+            } catch (error) {
+                if (error instanceof Error) {
+                    toast.error(
+                        error.message || "Failed to update category order"
+                    );
+                } else {
+                    toast.error("Failed to update category order");
+                }
+            }
+        }
+    };
+
     return (
         <div>
             <div className="flex justify-between items-center mb-6">
@@ -56,56 +86,38 @@ export default function CategoryList() {
             </div>
 
             <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-                <ul className="divide-y divide-gray-200">
-                    {categories.map((category) => (
-                        <li key={category.id} className="p-4 hover:bg-gray-50">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                    <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500">
-                                        <FontAwesomeIcon
-                                            icon={[
-                                                "fas",
-                                                category.icon as IconName,
-                                            ]}
-                                        />
-                                    </div>
-                                    <div className="ml-3">
-                                        <p className="text-sm font-medium text-gray-900">
-                                            {category.name}
-                                        </p>
-                                        <p className="text-sm text-gray-500">
-                                            {category.slug}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <button
-                                        onClick={() => onEdit(category)}
-                                        className="p-1 text-gray-400 hover:text-yellow-500"
-                                    >
-                                        <Pencil className="w-5 h-5" />
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            setSelectedCategory(category)
-                                            setShowDeleteModal(true)
-                                        }}
-                                        className="p-1 text-gray-400 hover:text-red-500"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            </div>
-                        </li>
-                    ))}
-                    {categories.length === 0 && (
-                        <li className="p-4 text-center text-gray-500">
-                            No categories yet. Add your first category to get
-                            started.
-                        </li>
-                    )}
-                </ul>
+                <DndContext
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <ul className="divide-y divide-gray-200">
+                        <SortableContext
+                            items={categories.map((c) => c.id)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {categories.map((category) => (
+                                <SortableRow
+                                    key={category.id}
+                                    id={category.id}
+                                    category={category}
+                                    onEdit={onEdit}
+                                    onDelete={(category) => {
+                                        setSelectedCategory(category);
+                                        setShowDeleteModal(true);
+                                    }}
+                                    setSelectedCategory={setSelectedCategory}
+                                    setShowDeleteModal={setShowDeleteModal}
+                                />
+                            ))}
+                        </SortableContext>
+                        {categories.length === 0 && (
+                            <li className="p-4 text-center text-gray-500">
+                                No categories yet. Add your first category to
+                                get started.
+                            </li>
+                        )}
+                    </ul>
+                </DndContext>
             </div>
 
             {showModal && (
@@ -117,7 +129,7 @@ export default function CategoryList() {
                     category={selectedCategory}
                 />
             )}
-            
+
             {showDeleteModal && (
                 <DeleteConfirmation
                     obj={{

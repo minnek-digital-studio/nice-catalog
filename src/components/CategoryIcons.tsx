@@ -1,6 +1,6 @@
-import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { Database } from '../types/supabase';
+import { IconName } from '@fortawesome/fontawesome-svg-core';
 
 type Category = Database['public']['Tables']['categories']['Row'];
 
@@ -35,7 +35,7 @@ export default function CategoryIcons({ categories, selectedCategory, onSelect }
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            <FontAwesomeIcon icon={['fas', category.icon]} className="w-5 h-5" />
+            <FontAwesomeIcon icon={['fas', category.icon as IconName]} className="w-5 h-5" />
             <span className="text-sm whitespace-nowrap">{category.name}</span>
           </button>
         ))}

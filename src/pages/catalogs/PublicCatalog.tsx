@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '../../lib/supabase';
@@ -74,7 +74,7 @@ export default function PublicCatalog() {
           .from('categories')
           .select('*')
           .eq('catalog_id', catalogData.id)
-          .order('name');
+          .order('position', { ascending: true });
 
         if (categoriesError) {
           throw new Error('Failed to load categories');
@@ -84,10 +84,10 @@ export default function PublicCatalog() {
           ...catalogData,
           products: products || [],
           categories: categories || []
-        });
-      } catch (error: any) {
+        } as Catalog );
+      } catch (error) {
         console.error('Error fetching catalog:', error);
-        toast.error(error.message || 'Failed to load catalog');
+        toast.error(error instanceof Error && error.message || 'Failed to load catalog');
         navigate('/');
       } finally {
         setLoading(false);
