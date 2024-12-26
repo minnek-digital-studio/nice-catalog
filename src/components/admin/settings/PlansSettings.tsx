@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getSubscriptionPlans, getCurrentSubscription, createCheckoutSession, cancelSubscription, createSubscription } from '../../../lib/stripe';
 import { Loader2, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import type { Database } from '../../../types/supabase';
 import { useSearchParams } from 'react-router-dom';
+import PlanButtonSettings from './PlanButtonSettings';
 
 type Plan = Database['public']['Tables']['subscription_plans']['Row'];
 type Subscription = Database['public']['Tables']['user_subscriptions']['Row'] & {
@@ -29,7 +30,7 @@ export default function PlansSettings() {
         }
 
         loadPlansAndSubscription();
-    }, []);
+    }, []); //eslint-disable-line
 
     const loadPlansAndSubscription = async () => {
         try {
@@ -38,7 +39,7 @@ export default function PlansSettings() {
                 getCurrentSubscription()
             ]);
             setPlans(plansData);
-            setCurrentSubscription(subscriptionData);
+            setCurrentSubscription(subscriptionData as Subscription);
         } catch (error) {
             console.error('Error loading plans:', error);
             toast.error('Failed to load subscription data');
@@ -51,8 +52,9 @@ export default function PlansSettings() {
         try {
             setUpgrading(true);
             await createCheckoutSession(priceId);
-        } catch (error: any) {
-            toast.error(error.message || 'Failed to start checkout');
+        } catch (error) {
+            if (error instanceof Error) return toast.error(error.message || 'Failed to start checkout');
+            toast.error('Failed to cancel subscription');
         } finally {
             setUpgrading(false);
         }
@@ -66,8 +68,9 @@ export default function PlansSettings() {
             await cancelSubscription();
             await loadPlansAndSubscription();
             toast.success('Subscription cancelled successfully');
-        } catch (error: any) {
-            toast.error(error.message || 'Failed to cancel subscription');
+        } catch (error) {
+            if (error instanceof Error) return toast.error(error.message || 'Failed to cancel subscription');
+            toast.error('Failed to cancel subscription');
         } finally {
             setCanceling(false);
         }
@@ -78,8 +81,11 @@ export default function PlansSettings() {
             await createSubscription(sessionId, planId, customerId);
             await loadPlansAndSubscription();
             toast.success('Subscription started successfully');
-        } catch (error: any) {
-            toast.error(error.message || 'Failed to finish checkout');
+        } catch (error) {
+            if (error instanceof Error) return toast.error(error.message || 'Failed to finish checkout');
+            console.log("Error", error)
+            toast.error('Failed to finish checkout')
+            
         }
     }
 
@@ -155,32 +161,30 @@ export default function PlansSettings() {
                                     <span className="text-base font-medium text-gray-500">/mo</span>
                                 </div>
                                 <ul className="mt-6 space-y-4">
-                                    {features.map((feature) => (
-                                        <li key={feature} className="flex items-center justify-center text-sm text-gray-500">
+                                    {features.map((feature, index) => (
+                                        <li key={feature || index} className="flex items-center justify-center text-sm text-gray-500">
                                             <Check className="h-4 w-4 text-[#ed1c24] mr-2" />
                                             {feature}
                                         </li>
                                     ))}
                                 </ul>
                                 {!isCurrentPlan && plan.stripe_price_id && (
-                                    <button
-                                        onClick={() => handleUpgrade(plan.stripe_price_id!)}
-                                        disabled={upgrading}
-                                        className="mt-8 w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#ed1c24] hover:bg-[#d91920] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ed1c24] disabled:opacity-50"
+                                    <PlanButtonSettings 
+                                         onClick={() => handleUpgrade(plan.stripe_price_id!)}
+                                         variant='upgrade'
                                     >
                                         {upgrading && <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />}
                                         Upgrade to {plan.name}
-                                    </button>
+                                    </PlanButtonSettings>
                                 )}
                                 {isCurrentPlan && !currentSubscription.cancel_at_period_end && plan.name !== 'Free' && (
-                                    <button
+                                    <PlanButtonSettings
                                         onClick={handleCancel}
-                                        disabled={canceling}
-                                        className="mt-8 w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ed1c24] disabled:opacity-50"
+                                        variant='downgrade'
                                     >
                                         {canceling && <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />}
                                         Cancel Subscription
-                                    </button>
+                                    </PlanButtonSettings>
                                 )}
                             </div>
                         </div>
