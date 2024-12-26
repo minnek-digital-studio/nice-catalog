@@ -11,6 +11,7 @@ import Settings from './pages/admin/Settings';
 import PublicCatalog from './pages/catalogs/PublicCatalog';
 import AuthGuard from './components/auth/AuthGuard';
 import { Toaster } from 'react-hot-toast';
+import ResetPassword from './pages/auth/ResetPassword';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/admin" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/admin/catalogs"
             element={
