@@ -23,8 +23,6 @@ export default function PlansSettings() {
     const [plans, setPlans] = useState<Plan[]>([]);
     const [currentSubscription, setCurrentSubscription] =
         useState<Subscription | null>(null);
-    const [upgrading, setUpgrading] = useState(false);
-    const [canceling, setCanceling] = useState(false);
     const [searchParams] = useSearchParams();
 
     useEffect(() => {
@@ -62,14 +60,11 @@ export default function PlansSettings() {
 
     const handleUpgrade = async (priceId: string) => {
         try {
-            setUpgrading(true);
             await createCheckoutSession(priceId);
         } catch (error) {
             if (error instanceof Error)
                 return toast.error(error.message || "Failed to start checkout");
             toast.error("Failed to cancel subscription");
-        } finally {
-            setUpgrading(false);
         }
     };
 
@@ -78,7 +73,6 @@ export default function PlansSettings() {
             return;
 
         try {
-            setCanceling(true);
             await cancelSubscription();
             await loadPlansAndSubscription();
             toast.success("Subscription cancelled successfully");
@@ -88,8 +82,6 @@ export default function PlansSettings() {
                     error.message || "Failed to cancel subscription"
                 );
             toast.error("Failed to cancel subscription");
-        } finally {
-            setCanceling(false);
         }
     };
 
@@ -216,9 +208,6 @@ export default function PlansSettings() {
                                         }
                                         variant="upgrade"
                                     >
-                                        {upgrading && (
-                                            <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                        )}
                                         Upgrade to {plan.name}
                                     </PlanButtonSettings>
                                 )}
@@ -229,9 +218,6 @@ export default function PlansSettings() {
                                             onClick={handleCancel}
                                             variant="downgrade"
                                         >
-                                            {canceling && (
-                                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                            )}
                                             Cancel Subscription
                                         </PlanButtonSettings>
                                     )}

@@ -1,5 +1,5 @@
 import { ButtonHTMLAttributes, useState } from "react";
-
+import { Loader2 } from "lucide-react";
 interface PlanButtonSettingsProps
     extends ButtonHTMLAttributes<HTMLButtonElement> {
     onClick: () => Promise<unknown>;
@@ -32,6 +32,7 @@ const PlanButtonSettings = ({
             disabled={loading}
             className={variantClasses[variant]}
         >
+            { loading && <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" /> }
             {children}
         </button>
     );
