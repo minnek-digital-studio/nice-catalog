@@ -395,11 +395,23 @@ export const useStore = create<StoreState>((set, get) => ({
         }
 
         try {
+            
+            const { data: maxPositionResult } = await supabase
+                .from("categories")
+                .select("position")
+                .eq("catalog_id", catalogId)
+                .order("position", { ascending: false })
+                .limit(1)
+                .single();
+                
+            const newPosition = (maxPositionResult?.position || 0) + 1;
+            
             const { data, error } = await supabase
                 .from("categories")
                 .insert({
                     ...category,
                     catalog_id: catalogId,
+                    position: newPosition
                 })
                 .select()
                 .single();
