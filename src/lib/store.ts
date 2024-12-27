@@ -38,6 +38,7 @@ interface StoreState {
   updateBrand: (id: string, updates: Partial<Database['public']['Tables']['brands']['Update']>) => Promise<Brand | null>;
   deleteBrand: (id: string) => Promise<boolean>;
   reorderProducts: (productId: string, newPosition: number) => Promise<void>;
+  reorderCategories: (categoryId: string, newPosition: number) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -194,7 +195,7 @@ export const useStore = create<StoreState>((set, get) => ({
                 .from("categories")
                 .select("*")
                 .eq("catalog_id", catalogId)
-                .order("name");
+                .order("position", { ascending: true });
 
             if (error) throw error;
             set({ categories: categories || [] });
@@ -394,11 +395,23 @@ export const useStore = create<StoreState>((set, get) => ({
         }
 
         try {
+            
+            const { data: maxPositionResult } = await supabase
+                .from("categories")
+                .select("position")
+                .eq("catalog_id", catalogId)
+                .order("position", { ascending: false })
+                .limit(1)
+                .single();
+                
+            const newPosition = (maxPositionResult?.position || 0) + 1;
+            
             const { data, error } = await supabase
                 .from("categories")
                 .insert({
                     ...category,
                     catalog_id: catalogId,
+                    position: newPosition
                 })
                 .select()
                 .single();
@@ -515,6 +528,58 @@ export const useStore = create<StoreState>((set, get) => ({
         } catch (error) {
             console.error("Error deleting brand:", error);
             return false;
+        }
+    },
+    
+    reorderCategories: async (categoryId: string, newPosition: number) => {
+        const categories = get().categories;
+        const catalogId = get().currentCatalog?.id;
+
+        if (!catalogId) return;
+
+        try {
+            const oldIndex = categories.findIndex((c) => c.id === categoryId);
+            const newIndex = newPosition;
+
+            if (oldIndex === -1) return;
+
+            const newCategories = [...categories];
+            const [movedCategory] = newCategories.splice(oldIndex, 1);
+            newCategories.splice(newIndex, 0, movedCategory);
+
+            const affectedCategories = newCategories.slice(
+                Math.min(oldIndex, newIndex),
+                Math.max(oldIndex, newIndex) + 1
+            );
+
+            const newCategoryList = newCategories.map((c, i) => {
+                if (affectedCategories.includes(c)) {
+                    return { ...c, position: i + Math.min(oldIndex, newIndex) };
+                }
+                return c;
+            });
+
+            const updateAffectedCategories = affectedCategories.map((c, i) => ({
+                id: c.id,
+                position: i + Math.min(oldIndex, newIndex),
+            }));
+
+            updateAffectedCategories.forEach(async (category) => {
+                const { error } = await supabase
+                    .from("categories")
+                    .update({
+                        position: category.position,
+                    })
+                    .eq("id", category.id);
+                if (error) throw error
+            });
+
+            set({ categories: newCategoryList });
+        } catch (error) {
+            // Revert to original order on error
+            get().fetchCategories();
+            console.error("Error reordering categories:", error);
+            throw error;
         }
     },
 }));
