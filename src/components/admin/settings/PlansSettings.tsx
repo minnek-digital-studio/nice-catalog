@@ -51,8 +51,12 @@ export default function PlansSettings() {
         try {
             setUpgrading(true);
             await createCheckoutSession(priceId);
-        } catch (error: any) {
-            toast.error(error.message || 'Failed to start checkout');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(error.message || 'Failed to upgrade subscription');
+            } else {
+                toast.error('Failed to upgrade subscription');
+            }
         } finally {
             setUpgrading(false);
         }
@@ -66,8 +70,12 @@ export default function PlansSettings() {
             await cancelSubscription();
             await loadPlansAndSubscription();
             toast.success('Subscription cancelled successfully');
-        } catch (error: any) {
-            toast.error(error.message || 'Failed to cancel subscription');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(error.message || 'Failed to cancel subscription');
+            } else {
+                toast.error('Failed to cancel subscription');
+            }
         } finally {
             setCanceling(false);
         }
@@ -78,8 +86,12 @@ export default function PlansSettings() {
             await createSubscription(sessionId, planId, customerId);
             await loadPlansAndSubscription();
             toast.success('Subscription started successfully');
-        } catch (error: any) {
-            toast.error(error.message || 'Failed to finish checkout');
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(error.message || 'Failed to finish checkout');
+            } else {
+                toast.error('Failed to finish checkout');
+            }
         }
     }
 
@@ -179,7 +191,7 @@ export default function PlansSettings() {
                                         className="mt-8 w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ed1c24] disabled:opacity-50"
                                     >
                                         {canceling && <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />}
-                                        Cancel Subscription
+                                        Downgrade
                                     </button>
                                 )}
                             </div>
