@@ -69,11 +69,16 @@ export default function LoginForm() {
 
     try {
       await signIn(formData.email, formData.password, formData.remember);
-      const from = (location.state as any)?.from || '/admin/catalogs';
+      const from = (location.state as {from?: string})?.from || '/admin/catalogs';
       navigate(from, { replace: true });
-    } catch (error: any) {
+    } catch (error) {
+      if (error instanceof Error){
+        console.error('Login error:', error);
+        toast.error(error.message || 'Invalid email or password');
+      } 
+      
+      toast.error('An error occurred. Please try again.');
       console.error('Login error:', error);
-      toast.error(error.message || 'Invalid email or password');
     } finally {
       setLoading(false);
     }
@@ -84,7 +89,7 @@ export default function LoginForm() {
       <div>
         <label 
           htmlFor="email" 
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Email address
         </label>
@@ -114,7 +119,7 @@ export default function LoginForm() {
       <div>
         <label 
           htmlFor="password" 
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-200"
         >
           Password
         </label>
@@ -161,10 +166,20 @@ export default function LoginForm() {
             onChange={(e) => handleChange('remember', e.target.checked)}
             className="h-4 w-4 text-[#ed1c24] focus:ring-[#ed1c24] border-gray-300 rounded"
           />
-          <label htmlFor="remember" className="ml-2 block text-sm text-gray-700">
+          <label htmlFor="remember" className="ml-2 block text-sm text-gray-700 dark:text-gray-200">
             Remember me
           </label>
         </div>
+        
+        <div className="text-sm">
+          <a 
+            href="/reset-password" 
+            className="font-medium text-[#ed1c24] hover:text-[#d91920] dark:text-[#ed1c24] dark:hover:text-[#d91920]"
+          >
+            Forgot your password?
+          </a>
+          
+          </div>
       </div>
 
       <button
