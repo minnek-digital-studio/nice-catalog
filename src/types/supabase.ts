@@ -92,6 +92,7 @@ export type Database = {
           icon: string
           id: string
           name: string
+          position: number
           slug: string
         }
         Insert: {
@@ -100,6 +101,7 @@ export type Database = {
           icon: string
           id?: string
           name: string
+          position: number
           slug: string
         }
         Update: {
@@ -108,6 +110,7 @@ export type Database = {
           icon?: string
           id?: string
           name?: string
+          position?: number
           slug?: string
         }
         Relationships: []
@@ -115,17 +118,18 @@ export type Database = {
       products: {
         Row: {
           brand: string
+          brand_id: string | null
           catalog_id: string | null
           category_id: string
           created_at: string
-          description: string
+          description: string | null
           flags: string[] | null
           id: string
           image_url: string
           is_published: boolean | null
           is_visible: boolean | null
           position: number | null
-          price: number
+          price: number | null
           slug: string
           stock_status: string | null
           title: string
@@ -134,17 +138,18 @@ export type Database = {
         }
         Insert: {
           brand: string
+          brand_id?: string | null
           catalog_id?: string | null
           category_id: string
           created_at?: string
-          description: string
+          description?: string | null
           flags?: string[] | null
           id?: string
           image_url: string
           is_published?: boolean | null
           is_visible?: boolean | null
           position?: number | null
-          price: number
+          price?: number | null
           slug: string
           stock_status?: string | null
           title: string
@@ -153,17 +158,18 @@ export type Database = {
         }
         Update: {
           brand?: string
+          brand_id?: string | null
           catalog_id?: string | null
           category_id?: string
           created_at?: string
-          description?: string
+          description?: string | null
           flags?: string[] | null
           id?: string
           image_url?: string
           is_published?: boolean | null
           is_visible?: boolean | null
           position?: number | null
-          price?: number
+          price?: number | null
           slug?: string
           stock_status?: string | null
           title?: string
@@ -171,6 +177,13 @@ export type Database = {
           visible?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "products_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "products_category_id_fkey"
             columns: ["category_id"]

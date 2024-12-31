@@ -218,7 +218,7 @@ export default function PlansSettings() {
                                             onClick={handleCancel}
                                             variant="downgrade"
                                         >
-                                            Cancel Subscription
+                                            Downgrade
                                         </PlanButtonSettings>
                                     )}
                             </div>
