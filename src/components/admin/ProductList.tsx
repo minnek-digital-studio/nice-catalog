@@ -3,8 +3,7 @@ import { useStore } from "../../lib/store";
 import {
     Plus,
     Search,
-    MoreVertical,
-    Edit2,
+    Pencil,
     Trash2,
     GripVertical,
 } from "lucide-react";
@@ -12,7 +11,6 @@ import ProductModal from "./ProductModal";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import ProductImage from "../ProductImage";
 import { toast } from "react-hot-toast";
-import { Menu, Transition } from "@headlessui/react";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import {
     SortableContext,
@@ -85,70 +83,31 @@ function SortableRow({
             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 {product.price !== null ? `$${product.price.toFixed(2)}` : "-"}
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <Menu as="div" className="relative inline-block text-left">
-                    <Menu.Button className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#ed1c24]">
-                        <MoreVertical className="w-5 h-5" />
-                    </Menu.Button>
-                    <Transition
-                        enter="transition ease-out duration-100"
-                        enterFrom="transform opacity-0 scale-95"
-                        enterTo="transform opacity-100 scale-100"
-                        leave="transition ease-in duration-75"
-                        leaveFrom="transform opacity-100 scale-100"
-                        leaveTo="transform opacity-0 scale-95"
-                    >
-                        <Menu.Items className="absolute right-0 mt-2 w-36 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                            <div className="py-1">
-                                <Menu.Item>
-                                    {({ active }) => (
-                                        <button
-                                            onClick={() =>
-                                                onToggleVisibility(product)
-                                            }
-                                            className={`${
-                                                active ? "bg-gray-100" : ""
-                                            } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
-                                        >
-                                            {product.visible ? (
-                                                <EyeOff className="size-4 mr-2" />
-                                            ) : (
-                                                <Eye className="size-4 mr-2" />
-                                            )}
-                                            {product.visible ? "Hide" : "Show"}
-                                        </button>
-                                    )}
-                                </Menu.Item>
-                                <Menu.Item>
-                                    {({ active }) => (
-                                        <button
-                                            onClick={() => onEdit(product)}
-                                            className={`${
-                                                active ? "bg-gray-100" : ""
-                                            } flex items-center w-full px-4 py-2 text-sm text-gray-700`}
-                                        >
-                                            <Edit2 className="w-4 h-4 mr-2" />
-                                            Edit
-                                        </button>
-                                    )}
-                                </Menu.Item>
-                                <Menu.Item>
-                                    {({ active }) => (
-                                        <button
-                                            onClick={() => onDelete(product)}
-                                            className={`${
-                                                active ? "bg-gray-100" : ""
-                                            } flex items-center w-full px-4 py-2 text-sm text-red-600`}
-                                        >
-                                            <Trash2 className="w-4 h-4 mr-2" />
-                                            Delete
-                                        </button>
-                                    )}
-                                </Menu.Item>
-                            </div>
-                        </Menu.Items>
-                    </Transition>
-                </Menu>
+            <td className="p-6 whitespace-nowrap text-right flex items-center justify-end space-x-2">
+                <button
+                    onClick={() =>
+                        onToggleVisibility(product)
+                    }
+                    className=" p-1 text-gray-400 hover:text-gray-700"
+                >
+                    {product.visible ? (
+                        <EyeOff className="size-5" />
+                    ) : (
+                        <Eye className="size-5" />
+                    )}
+                </button>
+                <button
+                    onClick={() => onEdit(product)}
+                    className="p-1 text-gray-400 hover:text-yellow-500"
+                >
+                    <Pencil className="size-5" />
+                </button>
+                <button
+                    onClick={() => onDelete(product)}
+                    className="p-1 text-gray-400 hover:text-red-500"
+                >
+                    <Trash2 className="size-5" />
+                </button>
             </td>
         </tr>
     );
@@ -289,7 +248,7 @@ export default function ProductList() {
                 </div>
             ) : (
                 <div className="bg-white shadow-sm rounded-lg">
-                    <div className="min-w-full">
+                    <div className="min-w-full overflow-x-auto">
                         <DndContext
                             collisionDetection={closestCenter}
                             onDragEnd={handleDragEnd}

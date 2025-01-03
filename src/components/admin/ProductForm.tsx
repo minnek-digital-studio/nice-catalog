@@ -17,7 +17,7 @@ type Product = Partial<Database["public"]["Tables"]["products"]["Update"]>;
 const schema = z.object({
     title: z.string().min(1, 'Product name is required'),
     description: z.string().optional(),
-    price: z.number().min(0, 'Price must be positive').optional().nullable(),
+    price: z.string().transform((val) => Number(val)).pipe(z.number().min(0, 'Price must be positive')).optional().nullable(),
     brand_id: z.string().optional(),
     category_id: z.string().min(1, 'Category is required'),
     show_price: z.boolean().default(true),
@@ -63,12 +63,12 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
 
     const handleImageChange = (file: File | null) => {
         const maxSize = 2 * 1024 * 1024; // 2MB
-        
+
         if (file && file.size > maxSize) {
             toast.error('Image size must be less than 2MB');
             return;
         }
-        
+
         setImageFile(file);
         if (file) {
             const reader = new FileReader();
@@ -91,7 +91,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
             }
 
             let imageUrl = imagePreview || '';
-            
+
             if (imageUrl === '' && imageFile) {
                 imageUrl = await uploadProductImage(imageFile);
             }
@@ -227,7 +227,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                                     className="relative -ml-px inline-flex items-center px-4 py-3 rounded-r-lg border-l border-gray-300 bg-gray-50 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-[#ed1c24]"
                                 >
                                     <Plus className="h-5 w-5" />
-                                    
+
                                 </button>
                         </div>
                         {errors.category_id && (
