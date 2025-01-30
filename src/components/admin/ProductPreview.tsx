@@ -1,13 +1,16 @@
-import React from 'react';
+import { Product } from "../../types/product";
 import { X } from 'lucide-react';
 
 interface Props {
-  product: any;
+  product: Product;
   imageFile: File | null;
   onClose: () => void;
 }
 
 export default function ProductPreview({ product, imageFile, onClose }: Props) {
+
+  const imageUrl = imageFile ? URL.createObjectURL(imageFile) : product.image_url;
+
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6">
@@ -23,9 +26,9 @@ export default function ProductPreview({ product, imageFile, onClose }: Props) {
 
         <div className="grid grid-cols-2 gap-6">
           <div>
-            {imageFile ? (
+            {imageUrl ? (
               <img
-                src={URL.createObjectURL(imageFile)}
+                src={imageUrl}
                 alt="Preview"
                 className="w-full h-64 object-cover rounded-lg"
               />
@@ -43,7 +46,11 @@ export default function ProductPreview({ product, imageFile, onClose }: Props) {
             </div>
 
             <div>
-              <p className="text-2xl font-bold">${product.price || '0.00'}</p>
+              {
+                product.price && (
+                  <p className="text-2xl font-bold">${product.price || '0.00'}</p>
+                )
+              }
               <span className={`inline-block px-2 py-1 text-sm rounded-full ${
                 product.stock_status === 'in_stock'
                   ? 'bg-green-100 text-green-800'
