@@ -46,7 +46,7 @@ export default function ProductModal({ product, category, onClose }: Props) {
               )}
               
               <div className="space-y-2">
-                {product.price !== null && product.show_price && (
+                {product.price !== null && (
                   <h3 className="text-2xl font-bold text-gray-900">${product.price.toFixed(2)}</h3>
                 )}
                 {product.brand && (

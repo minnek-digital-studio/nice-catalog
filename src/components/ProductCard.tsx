@@ -51,7 +51,7 @@ export default function ProductCard({ product, category }: Props) {
           </div>
 
           <div className="flex items-center justify-between mt-2">
-            {product.price !== null && product.show_price && (
+            {product.price !== null && (
               <span className="text-lg font-bold text-gray-900">
                 ${product.price.toFixed(2)}
               </span>
