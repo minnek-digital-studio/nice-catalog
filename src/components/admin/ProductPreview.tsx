@@ -1,8 +1,8 @@
-import React from 'react';
+import { Product } from "../../types/product";
 import { X } from 'lucide-react';
 
 interface Props {
-  product: any;
+  product: Product;
   imageFile: File | null;
   onClose: () => void;
 }
@@ -43,7 +43,11 @@ export default function ProductPreview({ product, imageFile, onClose }: Props) {
             </div>
 
             <div>
-              <p className="text-2xl font-bold">${product.price || '0.00'}</p>
+              {
+                product.price && (
+                  <p className="text-2xl font-bold">${product.price || '0.00'}</p>
+                )
+              }
               <span className={`inline-block px-2 py-1 text-sm rounded-full ${
                 product.stock_status === 'in_stock'
                   ? 'bg-green-100 text-green-800'
