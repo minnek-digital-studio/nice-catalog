@@ -8,6 +8,9 @@ interface Props {
 }
 
 export default function ProductPreview({ product, imageFile, onClose }: Props) {
+
+  const imageUrl = imageFile ? URL.createObjectURL(imageFile) : product.image_url;
+
   return (
     <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-2xl w-full p-6">
@@ -23,9 +26,9 @@ export default function ProductPreview({ product, imageFile, onClose }: Props) {
 
         <div className="grid grid-cols-2 gap-6">
           <div>
-            {imageFile ? (
+            {imageUrl ? (
               <img
-                src={URL.createObjectURL(imageFile)}
+                src={imageUrl}
                 alt="Preview"
                 className="w-full h-64 object-cover rounded-lg"
               />
