@@ -21,6 +21,8 @@ const schema = z.object({
     brand_id: z.string().optional(),
     category_id: z.string().min(1, 'Category is required'),
     show_price: z.boolean().default(true),
+    show_promo: z.boolean().default(false),
+    promo_text: z.string().max(20, "Promotion text must be at most 20 characters").optional().nullable(),
     image_url: z.string().optional().nullable(),
 });
 
@@ -51,6 +53,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
         resolver: zodResolver(schema),
         defaultValues: {
             show_price: true,
+            show_promo: false,
             ...initialData,
             price: initialData?.price || null,
         }
@@ -107,6 +110,8 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                 brand_id: data.brand_id || null,
                 category_id: data.category_id,
                 is_visible: data.show_price,
+                show_promo: data.show_promo,
+                promo_text: data.promo_text || null,
                 image_url: imageUrl,
                 slug,
             } as Product;
@@ -199,6 +204,34 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                             </div>
                             {errors.price && (
                                 <p className="mt-2 text-sm text-red-600">{errors.price.message}</p>
+                            )}
+                        </div>
+                    </div>
+                    <div>
+                        <div className="flex items-center mb-4">
+                            <input
+                                type="checkbox"
+                                id="show_promo"
+                                {...register('show_promo')}
+                                className="h-4 w-4 text-[#ed1c24] focus:ring-[#ed1c24] border-gray-300 rounded"
+                            />
+                            <label htmlFor="show_promo" className="ml-2 block text-sm text-gray-700">
+                                Display promotion text
+                            </label>
+                        </div>
+                        <div>
+                            <label htmlFor="promo_text" className="block text-sm font-medium text-gray-700 mb-2">
+                                Promotion Text
+                            </label>
+                            <input
+                                type="text"
+                                id="promo_text"
+                                {...register('promo_text')}
+                                className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
+                                placeholder="Enter promotion text"
+                            />
+                            {errors.promo_text && (
+                                <p className="mt-2 text-sm text-red-600">{errors.promo_text.message}</p>
                             )}
                         </div>
                     </div>

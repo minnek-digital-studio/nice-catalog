@@ -41,6 +41,7 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
   }, [fetchCategories, fetchBrands]);
 
   const showPrice = watch('show_price');
+  const showPromo = watch('show_promo');
   const formData = watch();
 
   return (
@@ -105,9 +106,9 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                     type="number"
                     id="price"
                     step="0.01"
-                    {...register('price', { 
+                    {...register('price', {
                       setValueAs: v => v === '' ? null : parseFloat(v),
-                      valueAsNumber: true 
+                      valueAsNumber: true
                     })}
                     className="block w-full pl-8 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
                     placeholder="0.00"
@@ -115,6 +116,37 @@ export default function ProductForm({ onSuccess, onCancel, initialData, productI
                 </div>
                 {errors.price && (
                   <p className="mt-2 text-sm text-red-600">{errors.price.message}</p>
+                )}
+              </div>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center mb-4">
+              <input
+                type="checkbox"
+                id="show_promo"
+                {...register('show_promo')}
+                className="h-4 w-4 text-[#ed1c24] focus:ring-[#ed1c24] border-gray-300 rounded"
+              />
+              <label htmlFor="show_price" className="ml-2 block text-sm text-gray-700">
+                Display promotion text
+              </label>
+            </div>
+
+            {showPromo && (
+              <div>
+                <label htmlFor="promo_text" className="block text-sm font-medium text-gray-700 mb-2">
+                  Promotion Text
+                </label>
+                <input
+                  type="text"
+                  id="promo_text"
+                  {...register('promo_text')}
+                  className="block w-full pl-8 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+                  placeholder="0.00"
+                />
+                {errors.promo_text && (
+                  <p className="mt-2 text-sm text-red-600">{errors.promo_text.message}</p>
                 )}
               </div>
             )}

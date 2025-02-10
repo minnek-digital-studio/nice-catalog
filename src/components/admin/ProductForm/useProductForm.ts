@@ -14,6 +14,8 @@ const productSchema = z.object({
   brand_id: z.string().optional(),
   category_id: z.string().min(1, 'Category is required'),
   show_price: z.boolean().default(false),
+  show_promo: z.boolean().default(false),
+  promo_text: z.string().optional(),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;
@@ -41,12 +43,14 @@ export function useProductForm({ onSuccess, initialData, productId }: UseProduct
       brand_id: brands.find(b => b.name === initialData?.brand)?.id || '',
       show_price: initialData?.price !== null,
       price: initialData?.price || null,
+      show_promo: initialData?.promo_text !== null,
+      promo_text: initialData?.promo_text || '',
     },
   });
 
   const handleImageChange = (file: File | null) => {
     const maxSize = 2 * 1024 * 1024; // 2MB
-        
+
     if (file && file.size > maxSize) {
         toast.error('Image size must be less than 2MB');
         return;
@@ -77,7 +81,7 @@ export function useProductForm({ onSuccess, initialData, productId }: UseProduct
       }
 
       const selectedBrand = brands.find(b => b.id === data.brand_id);
-      
+
       const productData = {
         title: data.title,
         description: data.description,
@@ -85,6 +89,7 @@ export function useProductForm({ onSuccess, initialData, productId }: UseProduct
         brand: selectedBrand?.name || '',
         category_id: data.category_id,
         image_url: imageUrl,
+        promo_text: data.show_promo ? data.promo_text : null,
       };
 
       if (isEditMode && productId) {
@@ -94,7 +99,7 @@ export function useProductForm({ onSuccess, initialData, productId }: UseProduct
         await createProduct(productData);
         toast.success('Product created successfully');
       }
-      
+
       onSuccess?.();
     } catch (error: any) {
       toast.error(error.message || `Failed to ${isEditMode ? 'update' : 'create'} product`);
