@@ -26,10 +26,15 @@ export default function ProductModal({ product, category, onClose }: Props) {
             <X className="w-6 h-6" />
           </button>
         </div>
-        
+
         <div className="p-6 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="aspect-square w-full relative bg-gray-100 rounded-lg overflow-hidden">
+              {product.show_promo && product.promo_text && (
+                <div className="absolute z-10 right-2 top-2  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-600 text-white">
+                  {product.promo_text}
+                </div>
+              )}
               <ProductImage
                 src={product.image_url}
                 alt={product.title}
@@ -37,14 +42,14 @@ export default function ProductModal({ product, category, onClose }: Props) {
                 size="lg"
               />
             </div>
-            
+
             <div className="space-y-4">
               {category && (
                 <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                   {category.name}
                 </div>
               )}
-              
+
               <div className="space-y-2">
                 {product.price !== null && (
                   <h3 className="text-2xl font-bold text-gray-900">${product.price.toFixed(2)}</h3>
