@@ -71,7 +71,7 @@ export default function ProductModal({ product, category, onClose }: Props) {
                                 <ProductImage
                                     src={activeImage?.url || product.image_url}
                                     alt={product.title}
-                                    className="size-full bg-gray-100"
+                                    className="size-full"
                                     size="lg"
                                 />
 
@@ -100,14 +100,6 @@ export default function ProductModal({ product, category, onClose }: Props) {
                                     product={product}
                                     setActive={setActiveImage}
                                 />
-                            )}
-
-                            {hasCarousel && (
-                                <button className="absolute top-2 right-2 bg-gray-100 rounded-full shadow-md px-1 py-0.5 aspect-square hover:bg-gray-400 transition-colors">
-                                    <span className="text-black">
-                                        +{product?.images?.length}
-                                    </span>
-                                </button>
                             )}
                         </div>
 

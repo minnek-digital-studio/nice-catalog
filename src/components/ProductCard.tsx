@@ -22,7 +22,7 @@ export default function ProductCard({ product, category }: Props) {
 
     return (
         <>
-            <div className="group bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200">
+            <div className="group bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 group">
                 <div className="relative aspect-square">
                     <ProductImage
                         src={productImg?.url || product.image_url}
@@ -39,6 +39,14 @@ export default function ProductCard({ product, category }: Props) {
                             View Details
                         </span>
                     </button>
+
+                    {product?.images && product.images.length > 1 && (
+                        <button className="absolute top-2 left-2 bg-gray-100 rounded-full shadow-md px-1 py-0.5 aspect-square transition-colors group-hover:bg-gray-400">
+                            <span className="text-black">
+                                +{product?.images?.length}
+                            </span>
+                        </button>
+                    )}
                 </div>
 
                 <div className="p-4">

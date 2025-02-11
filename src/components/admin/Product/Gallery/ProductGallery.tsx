@@ -109,7 +109,7 @@ export const ProductGallery = ({
 
                     {images.length > 0 && (
                         <div className="max-h-[230px] overflow-y-auto">
-                            <ul className="grid grid-cols-3 gap-4 auto-rows-fr mt-4">
+                            <ul className="grid grid-cols-3 gap-4 auto-rows-fr mt-4 place-items-center">
                                 {sortable ? (
                                     <SortableList
                                         items={images.map(

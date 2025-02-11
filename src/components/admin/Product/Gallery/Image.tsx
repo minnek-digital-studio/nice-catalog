@@ -13,7 +13,7 @@ const ProductGalleryImage = forwardRef<HTMLLIElement, ProductGalleryImageProps>(
     ({ image, index, handleImageClick, handleDeleteImage, ...props }, ref) => {
         return (
             <li
-                className={`relative border-2 transition-colors duration-200 ${
+                className={`relative border-2 transition-colors duration-200 max-h-36 max-w-36 size-full ${
                     image.is_primary
                         ? "border-green-500"
                         : "border-transparent hover:border-gray-300 group"
