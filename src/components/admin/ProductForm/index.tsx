@@ -3,10 +3,10 @@ import { useStore } from "../../../lib/store";
 import { Loader2, Plus } from "lucide-react";
 import { useProductForm } from "./useProductForm";
 import ImageUpload from "./ImageUpload";
-import ProductPreview from "../ProductPreview";
+import ProductPreview from "../Product/ProductPreview";
 import CategoryModal from "../CategoryModal";
 import BrandModal from "../BrandModal";
-import type { Product } from "../../../types/supabase";
+import type { Product } from "@/types/product";
 
 interface Props {
     onSuccess?: () => void;
@@ -46,6 +46,7 @@ export default function ProductForm({
     }, [fetchCategories, fetchBrands]);
 
     const showPrice = watch("show_price");
+    const showPromo = watch("show_promo");
     const formData = watch();
 
     return (
@@ -144,6 +145,46 @@ export default function ProductForm({
                                 )}
                             </div>
                         )}
+
+                        <div>
+                            <div className="flex items-center mb-4">
+                                <input
+                                    type="checkbox"
+                                    id="show_promo"
+                                    {...register("show_promo")}
+                                    className="h-4 w-4 text-[#ed1c24] focus:ring-[#ed1c24] border-gray-300 rounded"
+                                />
+                                <label
+                                    htmlFor="show_price"
+                                    className="ml-2 block text-sm text-gray-700"
+                                >
+                                    Display promotion text
+                                </label>
+                            </div>
+
+                            {showPromo && (
+                                <div>
+                                    <label
+                                        htmlFor="promo_text"
+                                        className="block text-sm font-medium text-gray-700 mb-2"
+                                    >
+                                        Promotion Text
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="promo_text"
+                                        {...register("promo_text")}
+                                        className="block w-full pl-8 pr-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm"
+                                        placeholder="0.00"
+                                    />
+                                    {errors.promo_text && (
+                                        <p className="mt-2 text-sm text-red-600">
+                                            {errors.promo_text.message}
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

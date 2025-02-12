@@ -25,6 +25,12 @@ const schema = z.object({
     brand_id: z.string().nullable(),
     category_id: z.string().min(1, "Category is required"),
     show_price: z.boolean().default(true),
+    show_promo: z.boolean().default(false),
+    promo_text: z
+        .string()
+        .max(20, "Promotion text must be at most 20 characters")
+        .optional()
+        .nullable(),
     images: z
         .array(
             z.object({
@@ -82,6 +88,7 @@ export default function ProductForm({
         resolver: zodResolver(schema),
         defaultValues: {
             show_price: true,
+            show_promo: false,
             ...initialData,
             price: initialData?.price || null,
         },
@@ -115,6 +122,8 @@ export default function ProductForm({
                 brand_id: data.brand_id || null,
                 category_id: data.category_id,
                 is_visible: data.show_price,
+                show_promo: data.show_promo,
+                promo_text: data.promo_text || null,
                 slug,
                 image_url: images.find((image) => image.is_primary)?.url || "",
             } as Product;
@@ -266,24 +275,40 @@ export default function ProductForm({
                         </div>
 
                         <div>
-                            <label
-                                htmlFor="description"
-                                className="block text-sm font-medium text-gray-700 mb-2"
-                            >
-                                Description
-                            </label>
-                            <textarea
-                                id="description"
-                                rows={4}
-                                {...register("description")}
-                                className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
-                                placeholder="Enter product description"
-                            />
-                            {errors.description && (
-                                <p className="mt-2 text-sm text-red-600">
-                                    {errors.description.message}
-                                </p>
-                            )}
+                            <div className="flex items-center mb-4">
+                                <input
+                                    type="checkbox"
+                                    id="show_promo"
+                                    {...register("show_promo")}
+                                    className="h-4 w-4 text-[#ed1c24] focus:ring-[#ed1c24] border-gray-300 rounded"
+                                />
+                                <label
+                                    htmlFor="show_promo"
+                                    className="ml-2 block text-sm text-gray-700"
+                                >
+                                    Display promotion text
+                                </label>
+                            </div>
+                            <div>
+                                <label
+                                    htmlFor="promo_text"
+                                    className="block text-sm font-medium text-gray-700 mb-2"
+                                >
+                                    Promotion Text
+                                </label>
+                                <input
+                                    type="text"
+                                    id="promo_text"
+                                    {...register("promo_text")}
+                                    className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
+                                    placeholder="Enter promotion text"
+                                />
+                                {errors.promo_text && (
+                                    <p className="mt-2 text-sm text-red-600">
+                                        {errors.promo_text.message}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -347,6 +372,27 @@ export default function ProductForm({
                                 </button>
                             </div>
                         </div>
+
+                        <div>
+                            <label
+                                htmlFor="description"
+                                className="block text-sm font-medium text-gray-700 mb-2"
+                            >
+                                Description
+                            </label>
+                            <textarea
+                                id="description"
+                                rows={4}
+                                {...register("description")}
+                                className="block w-full px-4 py-3 rounded-lg border-gray-300 shadow-sm focus:ring-[#ed1c24] focus:border-[#ed1c24] sm:text-sm border"
+                                placeholder="Enter product description"
+                            />
+                            {errors.description && (
+                                <p className="mt-2 text-sm text-red-600">
+                                    {errors.description.message}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -408,21 +454,7 @@ export default function ProductForm({
                         brand:
                             brands.find((b) => b.id === formData.brand_id)
                                 ?.name || "",
-                        catalog_id: null,
-                        created_at: new Date().toISOString(),
-                        flags: null,
-                        id: "preview",
-                        slug:
-                            formData.title
-                                ?.toLowerCase()
-                                .replace(/[^a-z0-9]+/g, "-")
-                                .replace(/(^-|-$)/g, "") || "",
-                        visible: true,
-                        is_published: true,
-                        is_visible: true,
-                        position: 0,
                         stock_status: "in_stock",
-                        updated_at: new Date().toISOString(),
                     }}
                     imageFile={
                         images.find((image) => image.is_primary)?.file || null

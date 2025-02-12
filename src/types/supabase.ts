@@ -165,6 +165,8 @@ export type Database = {
           is_visible: boolean | null
           position: number | null
           price: number | null
+          promo_text: string | null
+          show_promo: boolean | null
           slug: string
           stock_status: string | null
           title: string
@@ -185,6 +187,8 @@ export type Database = {
           is_visible?: boolean | null
           position?: number | null
           price?: number | null
+          promo_text?: string | null
+          show_promo?: boolean | null
           slug: string
           stock_status?: string | null
           title: string
@@ -205,6 +209,8 @@ export type Database = {
           is_visible?: boolean | null
           position?: number | null
           price?: number | null
+          promo_text?: string | null
+          show_promo?: boolean | null
           slug?: string
           stock_status?: string | null
           title?: string

@@ -2,7 +2,7 @@ import { Product } from "@/types/product";
 import { X } from "lucide-react";
 
 interface Props {
-    product: Product;
+    product: Partial<Product>;
     imageFile: File | null;
     onClose: () => void;
 }
@@ -26,7 +26,12 @@ export default function ProductPreview({ product, imageFile, onClose }: Props) {
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
-                    <div>
+                    <div className="relative">
+                        {product.show_promo && product.promo_text && (
+                            <div className="absolute z-10 right-2 top-2  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-600 text-white">
+                                {product.promo_text}
+                            </div>
+                        )}
                         {imageUrl ? (
                             <img
                                 src={imageUrl}

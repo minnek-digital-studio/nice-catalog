@@ -68,6 +68,11 @@ export default function ProductModal({ product, category, onClose }: Props) {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="flex flex-col gap-3 w-full h-full relative rounded-lg overflow-hidden">
                             <div className="flex flex-col relative flex-1 size-full">
+                                {product.show_promo && product.promo_text && (
+                                    <div className="absolute z-10 right-2 top-2  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-600 text-white">
+                                        {product.promo_text}
+                                    </div>
+                                )}
                                 <ProductImage
                                     src={activeImage?.url || product.image_url}
                                     alt={product.title}

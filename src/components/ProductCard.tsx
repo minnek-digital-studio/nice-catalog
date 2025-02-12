@@ -24,6 +24,11 @@ export default function ProductCard({ product, category }: Props) {
         <>
             <div className="group bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200 group">
                 <div className="relative aspect-square">
+                    {product.show_promo && product.promo_text && (
+                        <div className="absolute z-10 right-2 top-2  inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-600 text-white">
+                            {product.promo_text}
+                        </div>
+                    )}
                     <ProductImage
                         src={productImg?.url || product.image_url}
                         alt={product.title}
