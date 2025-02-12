@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useStore } from "../../lib/store";
-import AdminLayout from "../../components/admin/AdminLayout";
-import ProductTabs from "../../components/admin/ProductTabs";
-import TopNav from "../../components/admin/TopNav";
+import { useStore } from "@/lib/store";
+import AdminLayout from "@/components/admin/AdminLayout";
+import ProductTabs from "@/components/admin/Product/ProductTabs";
+import TopNav from "@/components/admin/TopNav";
 import { toast } from "react-hot-toast";
-import { useAuth } from "../../lib/auth/AuthProvider";
+import { useAuth } from "@/lib/auth/AuthProvider";
 
 export default function ProductsPage() {
     const { catalogId } = useParams<{ catalogId: string }>();

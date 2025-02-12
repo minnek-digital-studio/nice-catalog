@@ -51,7 +51,8 @@ export default function CatalogPage() {
             profile:profiles(*),
             products:products(
               *,
-              category:categories(*)
+              category:categories(*),
+              images:product_images(*)
             ),
             categories:categories(*)
           `)

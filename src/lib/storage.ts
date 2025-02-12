@@ -98,7 +98,7 @@ export async function deleteImage(url: string, bucket: string): Promise<void> {
 
     const filePath = decodeURIComponent(pathMatch[1]);
 
-    const { error } = await supabase.storage
+    const { error, data } = await supabase.storage
       .from(bucket)
       .remove([filePath]);
 

@@ -1,4 +1,4 @@
-import { type Category } from "../CategoryList";
+import { type Category } from "@/components/admin/CategoryList";
 import { useSortable } from "@dnd-kit/sortable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { IconName } from "@fortawesome/fontawesome-svg-core";

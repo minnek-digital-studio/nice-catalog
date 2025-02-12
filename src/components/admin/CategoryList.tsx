@@ -5,7 +5,7 @@ import CategoryModal from "./CategoryModal";
 import { toast } from "react-hot-toast";
 import type { Database } from "../../types/supabase";
 import DeleteConfirmation from "./DeleteConfirmation";
-import SortableRow from "./Category/SortableRow";
+import SortableRow from "@/components/admin/Category/SortableRow";
 import {
     SortableContext,
     verticalListSortingStrategy,
@@ -49,11 +49,7 @@ export default function CategoryList() {
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            const oldIndex = categories.findIndex((c) => c.id === active.id);
             const newIndex = categories.findIndex((c) => c.id === over.id);
-            const updatedCategorys = [...categories];
-            const [movedCategory] = updatedCategorys.splice(oldIndex, 1);
-            updatedCategorys.splice(newIndex, 0, movedCategory);
 
             try {
                 await reorderCategories(active.id as string, newIndex);
@@ -141,7 +137,7 @@ export default function CategoryList() {
                         setShowDeleteModal(false);
                         setSelectedCategory(null);
                     }}
-                    onConfirm={handleDelete}
+                    onConfirm={() => handleDelete(selectedCategory?.id || "")}
                 />
             )}
         </div>

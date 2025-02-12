@@ -2,43 +2,89 @@ import { create } from "zustand";
 import { supabase } from "./supabase";
 import type { Database } from "../types/supabase";
 import { generateUniqueSlug } from "./utils/slugs";
+import { deleteProductImage } from "./storage";
 
-type Profile = Database["public"]["Tables"]["profiles"]["Row"];
-type Product = Database["public"]["Tables"]["products"]["Row"] & {
+export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
+export type Product = Database["public"]["Tables"]["products"]["Row"] & {
     category?: Database["public"]["Tables"]["categories"]["Row"];
+    images: Database["public"]["Tables"]["product_images"]["Row"][];
 };
-type Category = Database["public"]["Tables"]["categories"]["Row"];
-type Catalog = Database["public"]["Tables"]["catalogs"]["Row"];
-type Brand = Database["public"]["Tables"]["brands"]["Row"];
+export type Image = Database["public"]["Tables"]["product_images"]["Row"];
+export type Category = Database["public"]["Tables"]["categories"]["Row"];
+export type Catalog = Database["public"]["Tables"]["catalogs"]["Row"];
+export type Brand = Database["public"]["Tables"]["brands"]["Row"];
 
 interface StoreState {
-  user: Profile | null;
-  catalogs: Catalog[];
-  currentCatalog: Catalog | null;
-  products: Product[];
-  categories: Category[];
-  brands: Brand[];
-  setUser: (user: Profile | null) => void;
-  updateProfile: (updates: Partial<Profile>) => Promise<void>;
-  fetchCatalogs: () => Promise<void>;
-  createCatalog: (catalog: Omit<Database['public']['Tables']['catalogs']['Insert'], 'user_id'>) => Promise<Catalog | null>;
-  updateCatalog: (id: string, updates: Partial<Database['public']['Tables']['catalogs']['Update']>) => Promise<Catalog | null>;
-  deleteCatalog: (id: string) => Promise<void>;
-  setCurrentCatalog: (catalog: Catalog | null) => void;
-  fetchProducts: () => Promise<void>;
-  fetchCategories: () => Promise<void>;
-  fetchBrands: () => Promise<void>;
-  createProduct: (product: Omit<Database['public']['Tables']['products']['Insert'], 'catalog_id'>) => Promise<Product | null>;
-  updateProduct: (id: string, updates: Partial<Database['public']['Tables']['products']['Update']>) => Promise<Product | null>;
-  deleteProduct: (id: string) => Promise<boolean>;
-  createCategory: (category: Omit<Database['public']['Tables']['categories']['Insert'], 'catalog_id'>) => Promise<Category | null>;
-  updateCategory: (id: string, updates: Partial<Database['public']['Tables']['categories']['Update']>) => Promise<Category | null>;
-  deleteCategory: (id: string) => Promise<boolean>;
-  createBrand: (brand: Omit<Database['public']['Tables']['brands']['Insert'], 'catalog_id'>) => Promise<Brand | null>;
-  updateBrand: (id: string, updates: Partial<Database['public']['Tables']['brands']['Update']>) => Promise<Brand | null>;
-  deleteBrand: (id: string) => Promise<boolean>;
-  reorderProducts: (productId: string, newPosition: number) => Promise<void>;
-  reorderCategories: (categoryId: string, newPosition: number) => Promise<void>;
+    user: Profile | null;
+    catalogs: Catalog[];
+    currentCatalog: Catalog | null;
+    products: Product[];
+    categories: Category[];
+    brands: Brand[];
+    setUser: (user: Profile | null) => void;
+    updateProfile: (updates: Partial<Profile>) => Promise<void>;
+    fetchCatalogs: () => Promise<void>;
+    createCatalog: (
+        catalog: Omit<
+            Database["public"]["Tables"]["catalogs"]["Insert"],
+            "user_id"
+        >
+    ) => Promise<Catalog | null>;
+    updateCatalog: (
+        id: string,
+        updates: Partial<Database["public"]["Tables"]["catalogs"]["Update"]>
+    ) => Promise<Catalog | null>;
+    deleteCatalog: (id: string) => Promise<void>;
+    setCurrentCatalog: (catalog: Catalog | null) => void;
+    fetchProducts: () => Promise<void>;
+    fetchCategories: () => Promise<void>;
+    fetchBrands: () => Promise<void>;
+    createProduct: (
+        product: Omit<
+            Database["public"]["Tables"]["products"]["Insert"],
+            "catalog_id"
+        >
+    ) => Promise<Product | null>;
+    updateProduct: (
+        id: string,
+        updates: Partial<Database["public"]["Tables"]["products"]["Update"]>
+    ) => Promise<Product | null>;
+    deleteProduct: (id: string) => Promise<boolean>;
+    createImages: (
+        images: Database["public"]["Tables"]["product_images"]["Insert"][]
+    ) => Promise<Image[]>;
+    updateImages: (
+        images: Database["public"]["Tables"]["product_images"]["Update"][],
+        productId: string
+    ) => Promise<Image[]>;
+    deleteImages: (image: Partial<Image>) => Promise<void>;
+    createCategory: (
+        category: Omit<
+            Database["public"]["Tables"]["categories"]["Insert"],
+            "catalog_id"
+        >
+    ) => Promise<Category | null>;
+    updateCategory: (
+        id: string,
+        updates: Partial<Database["public"]["Tables"]["categories"]["Update"]>
+    ) => Promise<Category | null>;
+    deleteCategory: (id: string) => Promise<boolean>;
+    createBrand: (
+        brand: Omit<
+            Database["public"]["Tables"]["brands"]["Insert"],
+            "catalog_id"
+        >
+    ) => Promise<Brand | null>;
+    updateBrand: (
+        id: string,
+        updates: Partial<Database["public"]["Tables"]["brands"]["Update"]>
+    ) => Promise<Brand | null>;
+    deleteBrand: (id: string) => Promise<boolean>;
+    reorderProducts: (productId: string, newPosition: number) => Promise<void>;
+    reorderCategories: (
+        categoryId: string,
+        newPosition: number
+    ) => Promise<void>;
 }
 
 export const useStore = create<StoreState>((set, get) => ({
@@ -130,21 +176,21 @@ export const useStore = create<StoreState>((set, get) => ({
 
     deleteCatalog: async (id) => {
         try {
-          const { error } = await supabase
-            .from('catalogs')
-            .delete()
-            .eq('id', id);
+            const { error } = await supabase
+                .from("catalogs")
+                .delete()
+                .eq("id", id);
 
-          if (error) throw error;
+            if (error) throw error;
 
-          set((state) => ({
-            catalogs: state.catalogs.filter((c) => c.id !== id)
-          }));
+            set((state) => ({
+                catalogs: state.catalogs.filter((c) => c.id !== id),
+            }));
         } catch (error) {
-          console.error('Error deleting catalog:', error);
-          throw error;
+            console.error("Error deleting catalog:", error);
+            throw error;
         }
-},
+    },
 
     setCurrentCatalog: (catalog) => {
         set({ currentCatalog: catalog });
@@ -169,14 +215,15 @@ export const useStore = create<StoreState>((set, get) => ({
                     `
           *,
           category:categories(*),
-          brand_obj:brands(*)
+          brand_obj:brands(*),
+          images:product_images(*)
         `
                 )
                 .eq("catalog_id", catalogId)
                 .order("position", { ascending: true });
 
             if (error) throw error;
-            set({ products: products as Product[] || [] });
+            set({ products: (products as Product[]) || [] });
         } catch (error) {
             console.error("Error fetching products:", error);
             set({ products: [] });
@@ -260,7 +307,8 @@ export const useStore = create<StoreState>((set, get) => ({
                     `
           *,
           category:categories(*),
-          brand_obj:brands(*)
+          brand_obj:brands(*),
+          images:product_images(*)
         `
                 )
                 .single();
@@ -298,10 +346,11 @@ export const useStore = create<StoreState>((set, get) => ({
                 .eq("id", id)
                 .select(
                     `
-          *,
-          category:categories(*),
-          brand_obj:brands(*)
-        `
+                        *,
+                        category:categories(*),
+                        brand_obj:brands(*),
+                        images:product_images(*)
+                    `
                 )
                 .single();
 
@@ -358,7 +407,7 @@ export const useStore = create<StoreState>((set, get) => ({
                         position: product.position,
                     })
                     .eq("id", product.id);
-                if (error) throw error
+                if (error) throw error;
             });
 
             set({ products: newProductList });
@@ -395,7 +444,6 @@ export const useStore = create<StoreState>((set, get) => ({
         }
 
         try {
-            
             const { data: maxPositionResult } = await supabase
                 .from("categories")
                 .select("position")
@@ -403,15 +451,15 @@ export const useStore = create<StoreState>((set, get) => ({
                 .order("position", { ascending: false })
                 .limit(1)
                 .single();
-                
+
             const newPosition = (maxPositionResult?.position || 0) + 1;
-            
+
             const { data, error } = await supabase
                 .from("categories")
                 .insert({
                     ...category,
                     catalog_id: catalogId,
-                    position: newPosition
+                    position: newPosition,
                 })
                 .select()
                 .single();
@@ -530,7 +578,7 @@ export const useStore = create<StoreState>((set, get) => ({
             return false;
         }
     },
-    
+
     reorderCategories: async (categoryId: string, newPosition: number) => {
         const categories = get().categories;
         const catalogId = get().currentCatalog?.id;
@@ -571,7 +619,7 @@ export const useStore = create<StoreState>((set, get) => ({
                         position: category.position,
                     })
                     .eq("id", category.id);
-                if (error) throw error
+                if (error) throw error;
             });
 
             set({ categories: newCategoryList });
@@ -581,5 +629,96 @@ export const useStore = create<StoreState>((set, get) => ({
             console.error("Error reordering categories:", error);
             throw error;
         }
+    },
+
+    createImages: async (images) => {
+        const { data: lastPositionImage } = await supabase
+            .from("product_images")
+            .select("position")
+            .eq("product_id", images[0].product_id)
+            .order("position", { ascending: false })
+            .limit(1)
+            .single();
+
+        const newPosition = (lastPositionImage?.position || 0) + 1;
+        const { data, error } = await supabase
+            .from("product_images")
+            .insert(
+                images.map((image, index) => ({
+                    ...image,
+                    position: newPosition + index,
+                }))
+            )
+            .select();
+
+        if (error) throw error;
+
+        set({
+            products: get().products.map((product) =>
+                product.id === images[0].product_id
+                    ? { ...product, images: [...product.images, ...data] }
+                    : product
+            ),
+        });
+
+        return data;
+    },
+
+    updateImages: async (images, productId) => {
+        const { data, error } = await supabase
+            .from("product_images")
+            .upsert(
+                images.map((image) => ({
+                    ...image,
+                    product_id: image.product_id as string,
+                    url: image.url as string,
+                })),
+                {
+                    onConflict: "id",
+                }
+            )
+            .select()
+            .order("position", { ascending: true });
+
+        if (error) throw error;
+
+        set({
+            products: get().products.map((product) =>
+                product.id === productId
+                    ? {
+                          ...product,
+                          images: data,
+                      }
+                    : product
+            ),
+        });
+        return data;
+    },
+
+    deleteImages: async (image) => {
+        if (!image.id) throw new Error("Image ID is required");
+        if (!image.url) throw new Error("Image URL is required");
+
+        const { error } = await supabase
+            .from("product_images")
+            .delete()
+            .eq("id", image.id);
+
+        if (error) throw error;
+
+        await deleteProductImage(image.url);
+
+        set({
+            products: get().products.map((product) =>
+                product.id === image.product_id
+                    ? {
+                          ...product,
+                          images: product.images.filter(
+                              (i) => i.id !== image.id
+                          ),
+                      }
+                    : product
+            ),
+        });
     },
 }));

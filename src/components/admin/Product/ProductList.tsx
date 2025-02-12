@@ -1,15 +1,9 @@
 import { useCallback, useState, useEffect } from "react";
-import { useStore } from "../../lib/store";
-import {
-    Plus,
-    Search,
-    Pencil,
-    Trash2,
-    GripVertical,
-} from "lucide-react";
-import ProductModal from "./ProductModal";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import ProductImage from "../ProductImage";
+import { useStore } from "@/lib/store";
+import { Plus, Search, Pencil, Trash2, GripVertical } from "lucide-react";
+import ProductModal from "@/components/admin/Product/ProductModal";
+import DeleteConfirmationModal from "@/components/admin/DeleteConfirmationModal";
+import ProductImage from "@/components/ProductImage";
 import { toast } from "react-hot-toast";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import {
@@ -18,12 +12,8 @@ import {
     useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Database } from "../../types/supabase";
 import { Eye, EyeOff } from "lucide-react";
-
-type Product = Database["public"]["Tables"]["products"]["Row"] & {
-    category?: Database["public"]["Tables"]["categories"]["Row"] | null;
-};
+import type { Product } from "@/lib/store";
 
 interface SortableRowProps {
     id: string;
@@ -60,7 +50,10 @@ function SortableRow({
                         <GripVertical className="w-4 h-4 text-gray-400" />
                     </div>
                     <ProductImage
-                        src={product.image_url}
+                        src={
+                            product.images.find((image) => image.is_primary)
+                                ?.url || product.image_url
+                        }
                         alt={product.title}
                         size="sm"
                         className="flex-shrink-0"
@@ -85,9 +78,7 @@ function SortableRow({
             </td>
             <td className="p-6 whitespace-nowrap text-right flex items-center justify-end space-x-2">
                 <button
-                    onClick={() =>
-                        onToggleVisibility(product)
-                    }
+                    onClick={() => onToggleVisibility(product)}
                     className=" p-1 text-gray-400 hover:text-gray-700"
                 >
                     {product.visible ? (
@@ -312,6 +303,7 @@ export default function ProductList() {
                 <ProductModal
                     product={selectedProduct || undefined}
                     onClose={handleCloseModal}
+                    setShowModal={setShowModal}
                 />
             )}
 

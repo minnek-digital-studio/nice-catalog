@@ -60,7 +60,7 @@ export default function PublicCatalog() {
         // Get products for this catalog
         const { data: products, error: productsError } = await supabase
           .from('products')
-          .select('*, category:categories(*)')
+          .select('*, category:categories(*), images:product_images(*)')
           .eq('catalog_id', catalogData.id)
           .eq('visible', true)
           .order('position', { ascending: true });
